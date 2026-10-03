@@ -116,8 +116,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Desfase UTC (ej. -3)</label><input type="number" id="utcA" value="-3" step="0.5"></div>
       </div>
       <div class="row">
-        <div><label>Latitud de nacimiento</label><input type="number" id="latA" step="0.0001" placeholder="Ej: -34.9011"></div>
-        <div><label>Longitud de nacimiento</label><input type="number" id="lonA" step="0.0001" placeholder="Ej: -56.1645"></div>
+        <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="latA_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('latA')">°<input type="number" id="latA_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('latA')">'<select id="latA_h" onchange="gmToDecimal('latA')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="latA"></div></div>
+        <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="lonA_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('lonA')">°<input type="number" id="lonA_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('lonA')">'<select id="lonA_h" onchange="gmToDecimal('lonA')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="lonA"></div></div>
       </div>
     </div>
     <div class="persona">
@@ -130,8 +130,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Desfase UTC (ej. -3)</label><input type="number" id="utcB" value="-3" step="0.5"></div>
       </div>
       <div class="row">
-        <div><label>Latitud de nacimiento</label><input type="number" id="latB" step="0.0001" placeholder="Ej: -34.9011"></div>
-        <div><label>Longitud de nacimiento</label><input type="number" id="lonB" step="0.0001" placeholder="Ej: -56.1645"></div>
+        <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="latB_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('latB')">°<input type="number" id="latB_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('latB')">'<select id="latB_h" onchange="gmToDecimal('latB')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="latB"></div></div>
+        <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="lonB_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('lonB')">°<input type="number" id="lonB_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('lonB')">'<select id="lonB_h" onchange="gmToDecimal('lonB')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="lonB"></div></div>
       </div>
     </div>
   </div>
@@ -220,14 +220,14 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC natal</label><input type="number" id="revNacUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="revNacLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="revNacLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="revNacLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('revNacLat')">°<input type="number" id="revNacLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('revNacLat')">'<select id="revNacLat_h" onchange="gmToDecimal('revNacLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="revNacLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="revNacLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('revNacLon')">°<input type="number" id="revNacLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('revNacLon')">'<select id="revNacLon_h" onchange="gmToDecimal('revNacLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="revNacLon"></div></div>
   </div>
 
   <h3>Lugar y huso donde se calcula (residencia actual, o de prueba para evaluar relocación)</h3>
   <div class="row">
-    <div><label>Latitud</label><input type="number" id="revLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud</label><input type="number" id="revLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="revLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('revLat')">°<input type="number" id="revLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('revLat')">'<select id="revLat_h" onchange="gmToDecimal('revLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="revLat"></div></div>
+    <div><label>Longitud</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="revLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('revLon')">°<input type="number" id="revLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('revLon')">'<select id="revLon_h" onchange="gmToDecimal('revLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="revLon"></div></div>
     <div><label>Desfase UTC</label><input type="number" id="revUtc" value="-3" step="0.5"></div>
   </div>
   <p class="aviso">Si el lugar de cálculo es distinto del natal, esto evalúa una relocación (recuerde: el MC se mueve con el cambio de longitud este-oeste; el Vértex, con el cambio de latitud norte-sur).</p>
@@ -262,8 +262,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC natal</label><input type="number" id="plNacUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="plNacLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="plNacLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="plNacLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('plNacLat')">°<input type="number" id="plNacLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('plNacLat')">'<select id="plNacLat_h" onchange="gmToDecimal('plNacLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="plNacLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="plNacLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('plNacLon')">°<input type="number" id="plNacLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('plNacLon')">'<select id="plNacLon_h" onchange="gmToDecimal('plNacLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="plNacLon"></div></div>
   </div>
   <h3>Momento a calcular</h3>
   <div class="row">
@@ -393,8 +393,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Desfase UTC</label><input type="number" id="synUtcA" value="-3" step="0.5"></div>
       </div>
       <div class="row">
-        <div><label>Latitud de nacimiento</label><input type="number" id="synLatA" step="0.0001" placeholder="Ej: -34.9011"></div>
-        <div><label>Longitud de nacimiento</label><input type="number" id="synLonA" step="0.0001" placeholder="Ej: -56.1645"></div>
+        <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="synLatA_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('synLatA')">°<input type="number" id="synLatA_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('synLatA')">'<select id="synLatA_h" onchange="gmToDecimal('synLatA')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="synLatA"></div></div>
+        <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="synLonA_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('synLonA')">°<input type="number" id="synLonA_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('synLonA')">'<select id="synLonA_h" onchange="gmToDecimal('synLonA')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="synLonA"></div></div>
       </div>
     </div>
     <div class="persona">
@@ -407,8 +407,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Desfase UTC</label><input type="number" id="synUtcB" value="-3" step="0.5"></div>
       </div>
       <div class="row">
-        <div><label>Latitud de nacimiento</label><input type="number" id="synLatB" step="0.0001" placeholder="Ej: -34.9011"></div>
-        <div><label>Longitud de nacimiento</label><input type="number" id="synLonB" step="0.0001" placeholder="Ej: -56.1645"></div>
+        <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="synLatB_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('synLatB')">°<input type="number" id="synLatB_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('synLatB')">'<select id="synLatB_h" onchange="gmToDecimal('synLatB')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="synLatB"></div></div>
+        <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="synLonB_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('synLonB')">°<input type="number" id="synLonB_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('synLonB')">'<select id="synLonB_h" onchange="gmToDecimal('synLonB')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="synLonB"></div></div>
       </div>
     </div>
   </div>
@@ -461,8 +461,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC (nacimiento)</label><input type="number" id="prgUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="prgLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="prgLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="prgLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('prgLat')">°<input type="number" id="prgLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('prgLat')">'<select id="prgLat_h" onchange="gmToDecimal('prgLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="prgLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="prgLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('prgLon')">°<input type="number" id="prgLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('prgLon')">'<select id="prgLon_h" onchange="gmToDecimal('prgLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="prgLon"></div></div>
   </div>
   <div class="row">
     <div><label>Fecha objetivo (a proyectar)</label><input type="date" id="prgFechaObj"></div>
@@ -491,8 +491,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC (nacimiento)</label><input type="number" id="arcUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="arcLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="arcLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="arcLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('arcLat')">°<input type="number" id="arcLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('arcLat')">'<select id="arcLat_h" onchange="gmToDecimal('arcLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="arcLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="arcLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('arcLon')">°<input type="number" id="arcLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('arcLon')">'<select id="arcLon_h" onchange="gmToDecimal('arcLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="arcLon"></div></div>
   </div>
   <div class="row">
     <div><label>Fecha objetivo (a proyectar)</label><input type="date" id="arcFechaObj"></div>
@@ -530,8 +530,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="estUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="estLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="estLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="estLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('estLat')">°<input type="number" id="estLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('estLat')">'<select id="estLat_h" onchange="gmToDecimal('estLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="estLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="estLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('estLon')">°<input type="number" id="estLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('estLon')">'<select id="estLon_h" onchange="gmToDecimal('estLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="estLon"></div></div>
   </div>
   <div style="text-align:center;margin-top:10px;">
     <button onclick="calcularEstrellasNatal()">✦ Buscar conjunciones natales con estrellas fijas ✦</button>
@@ -564,8 +564,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="mtUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="mtLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="mtLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="mtLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('mtLat')">°<input type="number" id="mtLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('mtLat')">'<select id="mtLat_h" onchange="gmToDecimal('mtLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="mtLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="mtLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('mtLon')">°<input type="number" id="mtLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('mtLon')">'<select id="mtLon_h" onchange="gmToDecimal('mtLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="mtLon"></div></div>
   </div>
   <div class="row">
     <div><label>Años hacia atrás</label><input type="number" id="mtAniosAtras" value="8" step="1"></div>
@@ -596,8 +596,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="jpUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="jpLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="jpLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="jpLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('jpLat')">°<input type="number" id="jpLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('jpLat')">'<select id="jpLat_h" onchange="gmToDecimal('jpLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="jpLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="jpLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('jpLon')">°<input type="number" id="jpLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('jpLon')">'<select id="jpLon_h" onchange="gmToDecimal('jpLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="jpLon"></div></div>
   </div>
   <div class="row">
     <div><label>Años hacia atrás</label><input type="number" id="jpAniosAtras" value="60" step="1"></div>
@@ -632,8 +632,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="stUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="stLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="stLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="stLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('stLat')">°<input type="number" id="stLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('stLat')">'<select id="stLat_h" onchange="gmToDecimal('stLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="stLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="stLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('stLon')">°<input type="number" id="stLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('stLon')">'<select id="stLon_h" onchange="gmToDecimal('stLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="stLon"></div></div>
   </div>
   <div class="row">
     <div><label>Años hacia atrás</label><input type="number" id="stAniosAtras" value="90" step="1"></div>
@@ -671,8 +671,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
       </div>
       <div class="row"><div><label>Desfase UTC</label><input type="number" id="ctUtcA" value="-3" step="0.5"></div></div>
       <div class="row">
-        <div><label>Latitud (para Cotidian Cardinal 1)</label><input type="number" id="ctLatA" step="0.0001" placeholder="ej. -34.9011"></div>
-        <div><label>Longitud (para Cotidian Cardinal 1)</label><input type="number" id="ctLonA" step="0.0001" placeholder="ej. -56.1645"></div>
+        <div><label>Latitud (para Cotidian Cardinal 1)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="ctLatA_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('ctLatA')">°<input type="number" id="ctLatA_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('ctLatA')">'<select id="ctLatA_h" onchange="gmToDecimal('ctLatA')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="ctLatA"></div></div>
+        <div><label>Longitud (para Cotidian Cardinal 1)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="ctLonA_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('ctLonA')">°<input type="number" id="ctLonA_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('ctLonA')">'<select id="ctLonA_h" onchange="gmToDecimal('ctLonA')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="ctLonA"></div></div>
       </div>
     </div>
     <div class="persona">
@@ -736,8 +736,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="caUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud (opcional — para Ascendente/MC de cada carta)</label><input type="number" id="caLat" step="0.0001" placeholder="ej. -34.9011"></div>
-    <div><label>Longitud (opcional)</label><input type="number" id="caLon" step="0.0001" placeholder="ej. -56.1645"></div>
+    <div><label>Latitud (opcional — para Ascendente/MC de cada carta)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="caLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('caLat')">°<input type="number" id="caLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('caLat')">'<select id="caLat_h" onchange="gmToDecimal('caLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="caLat"></div></div>
+    <div><label>Longitud (opcional)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="caLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('caLon')">°<input type="number" id="caLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('caLon')">'<select id="caLon_h" onchange="gmToDecimal('caLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="caLon"></div></div>
   </div>
   <div class="row">
     <div><label>Cartas hacia adelante</label><input type="number" id="caPasosAdelante" value="12" step="1"></div>
@@ -762,8 +762,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="hoUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud del consultante</label><input type="number" id="hoLat" step="0.0001" placeholder="ej. -34.9011"></div>
-    <div><label>Longitud del consultante</label><input type="number" id="hoLon" step="0.0001" placeholder="ej. -56.1645"></div>
+    <div><label>Latitud del consultante</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="hoLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('hoLat')">°<input type="number" id="hoLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('hoLat')">'<select id="hoLat_h" onchange="gmToDecimal('hoLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="hoLat"></div></div>
+    <div><label>Longitud del consultante</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="hoLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('hoLon')">°<input type="number" id="hoLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('hoLon')">'<select id="hoLon_h" onchange="gmToDecimal('hoLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="hoLon"></div></div>
   </div>
   <div class="row">
     <div><label>Pregunta (opcional, solo referencia)</label><input type="text" id="hoPregunta" placeholder="ej. ¿Cuándo se vende la casa?"></div>
@@ -943,8 +943,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
   </div>
   <div class="row">
     <div><label>Desfase UTC A</label><input type="number" id="dsUtcA" value="-3" step="0.5"></div>
-    <div><label>Latitud A</label><input type="number" id="dsLatA" step="0.0001" placeholder="-34.90"></div>
-    <div><label>Longitud A</label><input type="number" id="dsLonA" step="0.0001" placeholder="-56.20"></div>
+    <div><label>Latitud A</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="dsLatA_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('dsLatA')">°<input type="number" id="dsLatA_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('dsLatA')">'<select id="dsLatA_h" onchange="gmToDecimal('dsLatA')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="dsLatA"></div></div>
+    <div><label>Longitud A</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="dsLonA_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('dsLonA')">°<input type="number" id="dsLonA_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('dsLonA')">'<select id="dsLonA_h" onchange="gmToDecimal('dsLonA')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="dsLonA"></div></div>
   </div>
   <div class="row">
     <div><label>Nombre persona B</label><input type="text" id="dsNombreB" value="Sofía"></div>
@@ -953,8 +953,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
   </div>
   <div class="row">
     <div><label>Desfase UTC B</label><input type="number" id="dsUtcB" value="-3" step="0.5"></div>
-    <div><label>Latitud B</label><input type="number" id="dsLatB" step="0.0001" placeholder="-34.90"></div>
-    <div><label>Longitud B</label><input type="number" id="dsLonB" step="0.0001" placeholder="-56.20"></div>
+    <div><label>Latitud B</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="dsLatB_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('dsLatB')">°<input type="number" id="dsLatB_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('dsLatB')">'<select id="dsLatB_h" onchange="gmToDecimal('dsLatB')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="dsLatB"></div></div>
+    <div><label>Longitud B</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="dsLonB_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('dsLonB')">°<input type="number" id="dsLonB_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('dsLonB')">'<select id="dsLonB_h" onchange="gmToDecimal('dsLonB')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="dsLonB"></div></div>
   </div>
   <div class="row">
     <div><label>Variante de retornos</label>
@@ -987,8 +987,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="pnUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="pnLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="pnLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="pnLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('pnLat')">°<input type="number" id="pnLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('pnLat')">'<select id="pnLat_h" onchange="gmToDecimal('pnLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="pnLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="pnLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('pnLon')">°<input type="number" id="pnLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('pnLon')">'<select id="pnLon_h" onchange="gmToDecimal('pnLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="pnLon"></div></div>
   </div>
   <div class="row">
     <div><label>Edad desde (años)</label><input type="number" id="pnAniosDesde" value="0" step="1"></div>
@@ -1044,8 +1044,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC</label><input type="number" id="evUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="evLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="evLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="evLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('evLat')">°<input type="number" id="evLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('evLat')">'<select id="evLat_h" onchange="gmToDecimal('evLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="evLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="evLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('evLon')">°<input type="number" id="evLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('evLon')">'<select id="evLon_h" onchange="gmToDecimal('evLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="evLon"></div></div>
   </div>
   <div class="check-inline">
     <input type="checkbox" id="evConRevo">
@@ -1053,8 +1053,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
   </div>
   <div class="row" id="evRevoRow" style="display:none;">
     <div><label>Año de la Revolución Solar</label><input type="number" id="evAnioRevo" step="1" placeholder="Ej: 2024"></div>
-    <div><label>Latitud de residencia (para la revolución)</label><input type="number" id="evLatRevo" step="0.0001" placeholder="Vacío = usa la natal"></div>
-    <div><label>Longitud de residencia (para la revolución)</label><input type="number" id="evLonRevo" step="0.0001" placeholder="Vacío = usa la natal"></div>
+    <div><label>Latitud de residencia (para la revolución)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="evLatRevo_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('evLatRevo')">°<input type="number" id="evLatRevo_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('evLatRevo')">'<select id="evLatRevo_h" onchange="gmToDecimal('evLatRevo')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="evLatRevo"></div></div>
+    <div><label>Longitud de residencia (para la revolución)</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="evLonRevo_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('evLonRevo')">°<input type="number" id="evLonRevo_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('evLonRevo')">'<select id="evLonRevo_h" onchange="gmToDecimal('evLonRevo')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="evLonRevo"></div></div>
   </div>
   <div style="text-align:center;margin-top:10px;">
     <button onclick="calcularEventosVida()">✦ Chequear Reglas ✦</button>
@@ -1145,8 +1145,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Desfase UTC (nacimiento)</label><input type="number" id="csUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Latitud de nacimiento</label><input type="number" id="csLat" step="0.0001" placeholder="Ej: -34.9011"></div>
-    <div><label>Longitud de nacimiento</label><input type="number" id="csLon" step="0.0001" placeholder="Ej: -56.1645"></div>
+    <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="csLat_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('csLat')">°<input type="number" id="csLat_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('csLat')">'<select id="csLat_h" onchange="gmToDecimal('csLat')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="csLat"></div></div>
+    <div><label>Longitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="csLon_g" min="0" max="180" step="1" value="56" placeholder="Gr" style="width:62px" oninput="gmToDecimal('csLon')">°<input type="number" id="csLon_m" min="0" max="59.999" step="0.01" value="11" placeholder="Min" style="width:66px" oninput="gmToDecimal('csLon')">'<select id="csLon_h" onchange="gmToDecimal('csLon')" style="width:72px"><option value="-1" selected>Oeste</option><option value="1">Este</option></select><input type="hidden" id="csLon"></div></div>
     <div><label>Años atrás/adelante (banco)</label><input type="number" id="csAnios" value="60" step="1"></div>
   </div>
   <div class="row">
@@ -1170,6 +1170,29 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
 const API_BASE = ''; // mismo origen (Flask sirve el frontend)
 let ultimosResultados = [];
 const cacheLecturas = {};
+
+// Convierte un widget de grados/minutos/hemisferio (prefix+'_g', prefix+'_m', prefix+'_h')
+// a un decimal con signo y lo escribe en el input oculto id=prefix, para que el resto
+// del código (que lee document.getElementById(prefix).value) siga funcionando sin cambios.
+const PREFIJOS_LATLON = ['latA','lonA','latB','lonB','revNacLat','revNacLon','revLat','revLon',
+  'plNacLat','plNacLon','synLatA','synLonA','synLatB','synLonB','prgLat','prgLon','arcLat','arcLon',
+  'estLat','estLon','mtLat','mtLon','jpLat','jpLon','stLat','stLon','ctLatA','ctLonA','caLat','caLon',
+  'hoLat','hoLon','dsLatA','dsLonA','dsLatB','dsLonB','pnLat','pnLon','evLat','evLon',
+  'evLatRevo','evLonRevo','csLat','csLon'];
+
+function gmToDecimal(prefix, isLon){
+  const g = parseFloat(document.getElementById(prefix+'_g').value) || 0;
+  const m = parseFloat(document.getElementById(prefix+'_m').value) || 0;
+  const hemi = document.getElementById(prefix+'_h').value; // '-1' o '1'
+  const decimal = (Math.abs(g) + m/60) * parseFloat(hemi);
+  const hidden = document.getElementById(prefix);
+  if (hidden) hidden.value = decimal.toFixed(6);
+  return decimal;
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+  PREFIJOS_LATLON.forEach(function(prefix){ gmToDecimal(prefix); });
+});
 
 function mostrarTab(nombre, btn){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('activo'));
