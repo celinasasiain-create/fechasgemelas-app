@@ -139,6 +139,7 @@ def rectificar():
             sideral=data.get("sideral", True),
             ventana_horas=data.get("ventana_horas", 2),
             aspecto_objetivo=data.get("aspecto_objetivo"),
+            second=data.get("second", 0),
         )
     except Exception as e:
         return jsonify({"error": f"No se pudo rectificar: {e}"}), 500

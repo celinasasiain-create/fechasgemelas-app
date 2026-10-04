@@ -113,7 +113,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Hora</label><input type="time" id="horaA" step="60"></div>
       </div>
       <div class="row">
-        <div><label>Desfase UTC (ej. -3)</label><input type="number" id="utcA" value="-3" step="0.5"></div>
+        <div><label>Desfase UTC (horas y minutos)</label><input type="number" id="utcA" value="-3" step="0.5"></div>
       </div>
       <div class="row">
         <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="latA_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('latA')">°<input type="number" id="latA_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('latA')">'<select id="latA_h" onchange="gmToDecimal('latA')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="latA"></div></div>
@@ -127,7 +127,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <div><label>Hora</label><input type="time" id="horaB" step="60"></div>
       </div>
       <div class="row">
-        <div><label>Desfase UTC (ej. -3)</label><input type="number" id="utcB" value="-3" step="0.5"></div>
+        <div><label>Desfase UTC (horas y minutos)</label><input type="number" id="utcB" value="-3" step="0.5"></div>
       </div>
       <div class="row">
         <div><label>Latitud de nacimiento</label><div style="display:flex;gap:4px;align-items:center;"><input type="number" id="latB_g" min="0" max="90" step="1" value="34" placeholder="Gr" style="width:62px" oninput="gmToDecimal('latB')">°<input type="number" id="latB_m" min="0" max="59.999" step="0.01" value="53" placeholder="Min" style="width:66px" oninput="gmToDecimal('latB')">'<select id="latB_h" onchange="gmToDecimal('latB')" style="width:72px"><option value="-1" selected>Sur</option><option value="1">Norte</option></select><input type="hidden" id="latB"></div></div>
@@ -178,14 +178,16 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
 
 <div class="card">
   <h2>Rectificar hora exacta (por conjunción de Luna)</h2>
-  <p class="sub" style="text-align:left;margin:0 0 12px;">Ajusta la hora de un evento buscando cuándo la Luna en tránsito hace un aspecto partil con una posición de referencia (por ejemplo, un Sol que encontraste en la comparación).</p>
+  <p class="sub" style="text-align:left;margin:0 0 12px;">Ajusta la hora buscando el instante exacto en que la <strong>Luna en tránsito</strong> hace el aspecto partil con una posición de referencia.<br>
+<strong>Camino recomendado:</strong> en <em>Comparar Fechas Gemelas</em>, en una fila donde una de las dos posiciones sea una <strong>Luna</strong>, pulse <strong>«Rectificar hora de …»</strong>. Esa Luna es la del <strong>retorno</strong> (su fecha y hora completas figuran en la fila), no la de su nacimiento. La app carga sola la fecha y hora del retorno, la posición de referencia y el sistema, y le muestra la <strong>hora de nacimiento rectificada</strong> (la original más la corrección). Las posiciones de las filas están calculadas en <strong>Trópico</strong>, por eso la casilla de Luna Sideral queda desmarcada.<br>
+<span style="color:var(--teal);">Uso manual: cargue la fecha y hora de un evento, el desfase UTC <em>que corresponde a ese lugar y año</em> (¡cambia de un año a otro en Uruguay!), la posición de referencia y el aspecto.</span></p>
   <div class="row">
     <div><label>Fecha del evento</label><input type="date" id="rectFecha"></div>
-    <div><label>Hora aproximada</label><input type="time" id="rectHora" step="60"></div>
+    <div><label>Hora aproximada (h:min:s)</label><input type="time" id="rectHora" step="1"></div>
     <div><label>Desfase UTC</label><input type="number" id="rectUtc" value="-3" step="0.5"></div>
   </div>
   <div class="row">
-    <div><label>Longitud de referencia (grados, 0-360)</label><input type="number" id="rectRef" step="0.00001" placeholder="Ej: 69.34944"></div>
+    <div><label>Posición de referencia (signo, ° ′ ″)</label><input type="number" id="rectRef" data-lon360="1"></div>
     <div>
       <label>Aspecto buscado</label>
       <select id="rectAspecto">
@@ -196,10 +198,10 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
         <option value="Sextil">Sextil</option>
       </select>
     </div>
-    <div><label>Ventana de búsqueda (± horas)</label><input type="number" id="rectVentana" value="2"></div>
+    <div><label>Ventana de búsqueda (± h:min:s)</label><input type="number" id="rectVentana" value="6" data-dur="1"></div>
   </div>
   <label style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;">
-    <input type="checkbox" id="rectSideral" checked style="width:auto;"> Luna Sideral (Fagan-Bradley) — desmarcar para Trópica
+    <input type="checkbox" id="rectSideral" style="width:auto;"> Luna Sideral (Fagan-Bradley) — dejar desmarcada para Trópico (así están las posiciones de las filas de Fechas Gemelas)
   </label>
   <div style="text-align:center;">
     <button onclick="rectificarHora()">✦ Buscar hora exacta ✦</button>
@@ -289,7 +291,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
   <p class="sub" style="text-align:left;margin:0 0 12px;">Bonito (caso "Verazategui"): si la hora de nacimiento no está confirmada, se prueba minuto a minuto alrededor de una hora aproximada. Para cada candidata se calcula la Proluna DIRECTA y la Proluna CONVERSA (la misma progresión, pero "a favor de las agujas del reloj") en el momento de un evento puntual ya conocido (mudanza, fallecimiento, compra/venta de un inmueble…). La hora correcta es la que deja ambas en aspecto exacto (múltiplo de 15°) — menor orbe primero.</p>
   <div class="row">
     <div><label>Hora aproximada de nacimiento</label><input type="time" id="rpNacHoraAprox" step="60"></div>
-    <div><label>Rango de búsqueda (± minutos)</label><input type="number" id="rpRango" value="90" step="1"></div>
+    <div><label>Rango de búsqueda (± h:min:s)</label><input type="number" id="rpRango" value="90" data-dur="min"></div>
     <div><label>Paso (minutos)</label><input type="number" id="rpPaso" value="1" step="1"></div>
   </div>
   <h4 style="margin:10px 0 4px;color:var(--teal);font-size:.9em;">Evento conocido</h4>
@@ -363,7 +365,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
       </select>
     </div>
     <div><label>Rango de búsqueda (años adelante/atrás)</label><input type="number" id="mzAnios" value="150" step="10"></div>
-    <div><label>Ventana de ajuste de hora (± horas)</label><input type="number" id="mzVentana" value="1.5" step="0.5"></div>
+    <div><label>Ventana de ajuste de hora (± h:min:s)</label><input type="number" id="mzVentana" value="1.5" data-dur="1"></div>
   </div>
 
   <p class="aviso">Con rangos grandes (200-250 años) el cálculo puede tardar más de un minuto — empiece con un rango menor (100-150) para explorar.</p>
@@ -769,8 +771,8 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
     <div><label>Pregunta (opcional, solo referencia)</label><input type="text" id="hoPregunta" placeholder="ej. ¿Cuándo se vende la casa?"></div>
   </div>
   <div class="row">
-    <div><label>Orbe vínculo directo (°)</label><input type="number" id="hoOrbeVinculo" value="3" step="0.5"></div>
-    <div><label>Orbe tránsitos (°)</label><input type="number" id="hoOrbeTransito" value="3" step="0.5"></div>
+    <div><label>Orbe vínculo directo (° ′ ″)</label><input type="number" id="hoOrbeVinculo" value="3" data-arco="1"></div>
+    <div><label>Orbe tránsitos (° ′ ″)</label><input type="number" id="hoOrbeTransito" value="3" data-arco="1"></div>
     <div><label>Años a buscar (fecha exacta)</label><input type="number" id="hoAniosBusqueda" value="3" step="1"></div>
   </div>
   <div style="text-align:center;margin-top:10px;">
@@ -966,7 +968,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
       </select>
     </div>
     <div><label>Años atrás/adelante (banco)</label><input type="number" id="dsAnios" value="250" step="10"></div>
-    <div><label>Orbe máximo (°)</label><input type="number" id="dsOrbe" value="1.0" step="0.1"></div>
+    <div><label>Orbe máximo (° ′ ″)</label><input type="number" id="dsOrbe" value="1.0" data-arco="1"></div>
   </div>
   <div style="text-align:center;margin-top:10px;">
     <button onclick="calcularDiscriminacion()">✦ Calcular Discriminación ✦</button>
@@ -1190,6 +1192,137 @@ function gmToDecimal(prefix, isLon){
   return decimal;
 }
 
+
+// ---------- Formato grados/minutos/segundos de arco y h:m:s de tiempo ----------
+function dms(deg, dec){
+  if (deg === null || deg === undefined || isNaN(deg)) return '—';
+  dec = dec || 0;
+  const neg = deg < 0; let a = Math.abs(deg);
+  let tot = Math.round(a*3600*Math.pow(10,dec))/Math.pow(10,dec);
+  let g = Math.floor(tot/3600); tot -= g*3600;
+  let m = Math.floor(tot/60); let sec = tot - m*60;
+  const secTxt = dec ? sec.toFixed(dec).padStart(3+dec,'0') : String(Math.round(sec)).padStart(2,'0');
+  return (neg?'-':'') + g + '°' + String(m).padStart(2,'0') + '′' + secTxt + '″';
+}
+function hms(segundos){
+  if (segundos === null || segundos === undefined || isNaN(segundos)) return '—';
+  const neg = segundos < 0; let t = Math.round(Math.abs(segundos));
+  const h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60;
+  return (neg?'-':'') + h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function hmsSigno(segundos){ return (segundos>=0?'+':'−') + hms(Math.abs(segundos)); }
+const SIGNOS_ZOD = ['Aries','Tauro','Géminis','Cáncer','Leo','Virgo','Libra','Escorpio','Sagitario','Capricornio','Acuario','Piscis'];
+function lonAbsoluta(signo, grado){
+  const norm = x => x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  const i = SIGNOS_ZOD.findIndex(z => norm(z) === norm(signo));
+  return i < 0 ? NaN : i*30 + grado;
+}
+
+// ---------- Widgets de entrada ----------
+// Cada widget conserva el <input id=...> original (oculto) con el valor decimal, para que
+// el resto del código (document.getElementById(id).value) funcione sin cambios.
+const _ESTILO_N = 'width:58px';
+function _insertarWidget(inp, html){
+  const cont = document.createElement('span');
+  cont.style.cssText = 'display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;';
+  cont.innerHTML = html;
+  inp.type = 'hidden';
+  inp.parentNode.insertBefore(cont, inp);
+  return cont;
+}
+function crearWidgetUTC(inp){
+  const id = inp.id;
+  const opcional = inp.value === '' ;
+  const cont = _insertarWidget(inp,
+    `<select id="${id}_s" style="width:60px"><option value="-1">−</option><option value="1">+</option></select>` +
+    `<input type="number" id="${id}_hh" min="0" max="14" step="1" placeholder="h" style="${_ESTILO_N}">h` +
+    `<input type="number" id="${id}_mm" min="0" max="59" step="1" placeholder="min" style="${_ESTILO_N}">min`);
+  const sg=cont.querySelector('select'), hh=cont.querySelector('[id$=_hh]'), mm=cont.querySelector('[id$=_mm]');
+  function aDec(){
+    if (hh.value==='' && mm.value==='') { inp.value=''; return; }
+    inp.value = (parseFloat(sg.value) * ((parseFloat(hh.value)||0) + (parseFloat(mm.value)||0)/60)).toString();
+  }
+  function desdeDec(v){
+    v = parseFloat(v);
+    if (isNaN(v)) { hh.value=''; mm.value=''; inp.value=''; return; }
+    sg.value = v<0 ? '-1':'1';
+    const t = Math.round(Math.abs(v)*60);
+    hh.value = Math.floor(t/60); mm.value = t%60; inp.value = v.toString();
+  }
+  [sg,hh,mm].forEach(e=>e.addEventListener('input',aDec));
+  sg.addEventListener('change',aDec);
+  inp._set = desdeDec;
+  desdeDec(inp.value);
+  if (opcional) { sg.value='-1'; }
+}
+function crearWidgetDuracion(inp){   // decimal en HORAS (o MINUTOS si data-dur="min"); entrada h / min / s
+  const id = inp.id;
+  const unidad = inp.dataset.dur === 'min' ? 60 : 3600;   // segundos por unidad decimal
+  const cont = _insertarWidget(inp,
+    `<span>±</span><input type="number" id="${id}_hh" min="0" step="1" placeholder="h" style="${_ESTILO_N}">h` +
+    `<input type="number" id="${id}_mm" min="0" max="59" step="1" placeholder="min" style="${_ESTILO_N}">min` +
+    `<input type="number" id="${id}_ss" min="0" max="59" step="1" placeholder="s" style="${_ESTILO_N}">s`);
+  const hh=cont.querySelector('[id$=_hh]'), mm=cont.querySelector('[id$=_mm]'), ss=cont.querySelector('[id$=_ss]');
+  function aDec(){ inp.value = (((parseFloat(hh.value)||0)*3600 + (parseFloat(mm.value)||0)*60 + (parseFloat(ss.value)||0)) / unidad).toString(); }
+  function desdeDec(v){
+    v = parseFloat(v); if (isNaN(v)) return;
+    const t = Math.round(Math.abs(v)*unidad);
+    hh.value = Math.floor(t/3600); mm.value = Math.floor((t%3600)/60); ss.value = t%60; inp.value = v.toString();
+  }
+  [hh,mm,ss].forEach(e=>e.addEventListener('input',aDec));
+  inp._set = desdeDec;
+  desdeDec(inp.value);
+}
+function crearWidgetArco(inp){       // orbe/ángulo: entrada ° ′ ″ -> decimal en grados
+  const id = inp.id;
+  const cont = _insertarWidget(inp,
+    `<input type="number" id="${id}_g" min="0" step="1" placeholder="°" style="${_ESTILO_N}">°` +
+    `<input type="number" id="${id}_m" min="0" max="59" step="1" placeholder="′" style="${_ESTILO_N}">′` +
+    `<input type="number" id="${id}_s" min="0" max="59.99" step="0.01" placeholder="″" style="width:84px">″`);
+  const g=cont.querySelector('[id$=_g]'), m=cont.querySelector('[id$=_m]'), s=cont.querySelector('[id$=_s]');
+  function aDec(){ inp.value = ((parseFloat(g.value)||0) + (parseFloat(m.value)||0)/60 + (parseFloat(s.value)||0)/3600).toString(); }
+  function desdeDec(v){
+    v = parseFloat(v); if (isNaN(v)) return;
+    const t = Math.round(Math.abs(v)*3600*100)/100;
+    g.value = Math.floor(t/3600); const r = t - g.value*3600; m.value = Math.floor(r/60); s.value = (r - m.value*60).toFixed(2); inp.value = v.toString();
+  }
+  [g,m,s].forEach(e=>e.addEventListener('input',aDec));
+  inp._set = desdeDec;
+  desdeDec(inp.value);
+}
+function crearWidgetLon360(inp){     // signo zodiacal + ° ′ ″ (dentro del signo)  ->  0-360 decimal
+  const id = inp.id;
+  const opts = SIGNOS_ZOD.map((z,i)=>`<option value="${i}">${z}</option>`).join('');
+  const cont = _insertarWidget(inp,
+    `<select id="${id}_sg" style="width:120px">${opts}</select>` +
+    `<input type="number" id="${id}_g" min="0" max="29" step="1" placeholder="°" style="${_ESTILO_N}">°` +
+    `<input type="number" id="${id}_m" min="0" max="59" step="1" placeholder="′" style="${_ESTILO_N}">′` +
+    `<input type="number" id="${id}_s" min="0" max="59.99" step="0.01" placeholder="″" style="width:84px">″`);
+  const sg=cont.querySelector('select'), g=cont.querySelector('[id$=_g]'), m=cont.querySelector('[id$=_m]'), s=cont.querySelector('[id$=_s]');
+  function aDec(){
+    if (g.value==='' && m.value==='' && s.value==='') { inp.value=''; return; }
+    inp.value = (parseInt(sg.value)*30 + (parseFloat(g.value)||0) + (parseFloat(m.value)||0)/60 + (parseFloat(s.value)||0)/3600).toString();
+  }
+  function desdeDec(v){
+    v = parseFloat(v); if (isNaN(v)) { g.value=m.value=s.value=''; inp.value=''; return; }
+    v = ((v%360)+360)%360;
+    const tot = Math.round(v*3600*100)/100;
+    const signo = Math.floor(tot/(30*3600)); let r = tot - signo*30*3600;
+    sg.value = signo; g.value = Math.floor(r/3600); r -= g.value*3600; m.value = Math.floor(r/60); s.value = (r - m.value*60).toFixed(2);
+    inp.value = v.toString();
+  }
+  [sg,g,m,s].forEach(e=>e.addEventListener('input',aDec)); sg.addEventListener('change',aDec);
+  inp._set = desdeDec;
+}
+function setWidget(id, valor){ const el=document.getElementById(id); if(el && el._set) el._set(valor); else if(el) el.value=valor; }
+
+window.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('input[type=number][id*="utc" i]').forEach(crearWidgetUTC);
+  document.querySelectorAll('input[data-dur]').forEach(crearWidgetDuracion);
+  document.querySelectorAll('input[data-lon360]').forEach(crearWidgetLon360);
+  document.querySelectorAll('input[data-arco]').forEach(crearWidgetArco);
+});
+
 window.addEventListener('DOMContentLoaded', function(){
   PREFIJOS_LATLON.forEach(function(prefix){ gmToDecimal(prefix); });
 });
@@ -1284,12 +1417,13 @@ function renderTabla(){
   tbody.innerHTML = filas.slice(0,150).map((c,i)=>`
     <tr class="${c.partil?'partil':''}">
       <td>${c.cuerpo_A} × ${c.cuerpo_B}</td>
-      <td>${c.signo_A} ${c.grado_A.toFixed(2)}°<br><span style="color:var(--teal);font-size:.8em;">${c.fecha_A.slice(0,10)} (${c.variante_A})</span></td>
+      <td>${c.signo_A} ${dms(c.grado_A)}<br><span style="color:var(--teal);font-size:.8em;">${fechaHoraISO(c.fecha_A)} (${c.variante_A})</span></td>
       <td>${c.aspecto}</td>
-      <td>${c.signo_B} ${c.grado_B.toFixed(2)}°<br><span style="color:var(--teal);font-size:.8em;">${c.fecha_B.slice(0,10)} (${c.variante_B})</span></td>
-      <td class="orbe">${c.orbe.toFixed(3)}°</td>
+      <td>${c.signo_B} ${dms(c.grado_B)}<br><span style="color:var(--teal);font-size:.8em;">${fechaHoraISO(c.fecha_B)} (${c.variante_B})</span></td>
+      <td class="orbe">${dms(c.orbe)}</td>
       <td>
         <button class="secundario" onclick="verLectura(this, ${i}, '${filas===ultimosResultados?'todos':'filtrado'}')">Leer</button>
+        ${botonesRectificar(c, i)}
         <div class="lectura"></div>
       </td>
     </tr>
@@ -1470,14 +1604,54 @@ async function verLecturaGenerica(id){
   }
 }
 
+function fechaHoraISO(iso){ return iso.slice(0,10) + ' ' + iso.slice(11,19); }
+
+function botonesRectificar(c, i){
+  let h = '';
+  const nA = (document.getElementById('nombreA').value || 'A');
+  const nB = (document.getElementById('nombreB').value || 'B');
+  if (/\.luna$/i.test(c.cuerpo_A)) h += `<br><button class="secundario" style="margin-top:4px" onclick="rectificarDesdeFila(${i},'A')">⏱ Rectificar hora de ${nA}</button>`;
+  if (/\.luna$/i.test(c.cuerpo_B)) h += `<br><button class="secundario" style="margin-top:4px" onclick="rectificarDesdeFila(${i},'B')">⏱ Rectificar hora de ${nB}</button>`;
+  return h;
+}
+
+let _rectCtx = null;
+function rectificarDesdeFila(i, lado){
+  const fila = document.getElementById('tablaBody')._filasRenderizadas[i];
+  const otro = lado === 'A' ? 'B' : 'A';
+  const iso = fila['fecha_' + lado];
+  const ref = lonAbsoluta(fila['signo_' + otro], fila['grado_' + otro]);
+  document.getElementById('rectFecha').value = iso.slice(0,10);
+  document.getElementById('rectHora').value = iso.slice(11,19);
+  setWidget('rectUtc', document.getElementById('utc' + lado).value);
+  setWidget('rectRef', ref);
+  document.getElementById('rectAspecto').value = fila.aspecto;
+  document.getElementById('rectSideral').checked = false;   // las posiciones de las filas son Trópico
+  setWidget('rectVentana', 6);
+  _rectCtx = {lado: lado, iso: iso,
+              nombre: document.getElementById('nombre' + lado).value || lado,
+              fechaNat: document.getElementById('fecha' + lado).value,
+              horaNat: document.getElementById('hora' + lado).value,
+              fila: fila};
+  const btn = document.querySelector('.tab-btn[onclick*="\'rectificar\'"]');
+  mostrarTab('rectificar', btn);
+  rectificarHora();
+}
+
+function _msLocal(y,m,d,h,mi,s){ return Date.UTC(y, m-1, d, h, mi, s); }
+function _fmtLocal(ms){ const t = new Date(ms); const p=n=>String(n).padStart(2,'0');
+  return `${p(t.getUTCHours())}:${p(t.getUTCMinutes())}:${p(t.getUTCSeconds())}`; }
+
 async function rectificarHora(){
   const [y,m,d] = document.getElementById('rectFecha').value.split('-').map(Number);
-  const [h,min] = document.getElementById('rectHora').value.split(':').map(Number);
+  const [h,min,sec] = document.getElementById('rectHora').value.split(':').map(Number);
   const ref = parseFloat(document.getElementById('rectRef').value);
-  if(!y || isNaN(ref)){ alert('Cargá la fecha y la longitud de referencia.'); return; }
+  if(!y || isNaN(ref)){ alert('Cargue la fecha y la posición de referencia.'); return; }
+  // si el usuario cambió fecha/hora a mano, ya no corresponde al contexto de una fila
+  if (_rectCtx && _rectCtx.iso.slice(0,10) !== document.getElementById('rectFecha').value) _rectCtx = null;
 
   const payload = {
-    year:y, month:m, day:d, hour:h||0, minute:min||0,
+    year:y, month:m, day:d, hour:h||0, minute:min||0, second:sec||0,
     utc_offset: parseFloat(document.getElementById('rectUtc').value),
     lon_referencia: ref,
     aspecto_objetivo: document.getElementById('rectAspecto').value,
@@ -1494,17 +1668,35 @@ async function rectificarHora(){
     const data = await resp.json();
     if(data.error){ box.innerHTML = `<p style="color:var(--danger);">${data.error}</p>`; return; }
     if(!data.resultados.length){
-      box.innerHTML = '<p style="color:var(--teal);">No se encontró el aspecto exacto dentro de la ventana. Probá ampliarla.</p>';
+      box.innerHTML = `<p style="color:var(--teal);">No se encontró el aspecto exacto dentro de la ventana de ± ${hms(payload.ventana_horas*3600)}. Revise: (1) que la fecha y hora sean las del <strong>retorno</strong> de la fila (no las del nacimiento); (2) que el sistema sea Trópico si viene de una fila de Fechas Gemelas; (3) que el desfase UTC sea el de ese lugar y año; (4) ensanche la ventana.</p>`;
       return;
     }
-    box.innerHTML = data.resultados.map(r=>`
-      <div class="stat" style="text-align:left;margin-bottom:8px;">
-        <strong style="color:var(--partil);">✦ ${r.aspecto}</strong> —
-        ${String(r.hora_local.hour).padStart(2,'0')}:${String(r.hora_local.minute).padStart(2,'0')}:${String(r.hora_local.second).padStart(2,'0')} hs
-        (${r.hora_local.year}-${String(r.hora_local.month).padStart(2,'0')}-${String(r.hora_local.day).padStart(2,'0')})
-        <br><span style="color:var(--teal);font-size:.85em;">diferencia: ${r.diferencia_arco_segundos}'' de arco</span>
-      </div>
-    `).join('');
+    const p2 = n => String(n).padStart(2,'0');
+    box.innerHTML = data.resultados.map(r=>{
+      const hl = r.hora_local;
+      const ms = _msLocal(hl.year,hl.month,hl.day,hl.hour,hl.minute,hl.second);
+      let extra = '';
+      if (_rectCtx){
+        const base = _msLocal(y,m,d,h||0,min||0,sec||0);
+        const delta = (ms - base) / 1000;      // segundos que hay que correr
+        const [ny,nm,nd] = _rectCtx.fechaNat.split('-').map(Number);
+        const [nh,nmi] = _rectCtx.horaNat.split(':').map(Number);
+        const nat = _msLocal(ny,nm,nd,nh||0,nmi||0,0);
+        const rect = nat + delta*1000;
+        const rt = new Date(rect);
+        const fechaRect = `${rt.getUTCFullYear()}-${p2(rt.getUTCMonth()+1)}-${p2(rt.getUTCDate())}`;
+        extra = `<div style="margin-top:8px;padding:8px;border:1px solid var(--gold);border-radius:6px;">
+          <strong style="color:var(--gold);">Hora de nacimiento rectificada de ${_rectCtx.nombre}:</strong>
+          ${_fmtLocal(nat)} → <strong>${_fmtLocal(rect)}</strong>${fechaRect !== _rectCtx.fechaNat ? ' (' + fechaRect + ')' : ''}
+          <span style="color:var(--teal);">— corrección ${hmsSigno(delta)} (h:min:s)</span></div>`;
+      }
+      return `<div class="stat" style="text-align:left;margin-bottom:8px;">
+        <strong style="color:var(--partil);">✦ ${r.aspecto}</strong> — la Luna llega exacta a las
+        ${p2(hl.hour)}:${p2(hl.minute)}:${p2(hl.second)} hs (${hl.year}-${p2(hl.month)}-${p2(hl.day)})
+        <br><span style="color:var(--teal);font-size:.85em;">Luna en ${SIGNOS_ZOD[Math.floor(r.luna_lon/30)]} ${dms(r.luna_lon % 30, 1)} · diferencia residual: ${dms(r.diferencia_arco_segundos/3600, 2)}</span>
+        ${extra}
+      </div>`;
+    }).join('') + (_rectCtx ? `<p style="color:var(--teal);font-size:.85em;">Esta es una <strong>hipótesis</strong>: la Luna se mueve unos 13° por día, así que casi cualquier fila con Luna ofrece alguna corrección de pocos minutos. Una hora es creíble solo si varias filas independientes y algún evento de vida (Proluna, Revolución…) la sostienen. Para comprobarla, cargue la hora rectificada en la Persona ${_rectCtx.lado} y vuelva a comparar: la coincidencia de la fila debería quedar más ajustada. El cálculo supone que la fecha del retorno se corre en la misma cantidad que la hora de nacimiento (aproximación muy buena, no exacta).</p>` : '');
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
   }
@@ -1526,7 +1718,7 @@ function renderPuntosCarta(resultado){
       ${puntos.map(([nombre,p])=>`
         <div class="punto-item">
           <div class="nombre">${nombre}</div>
-          <div class="valor">${p.signo} ${p.grado.toFixed(2)}°</div>
+          <div class="valor">${p.signo} ${dms(p.grado)}</div>
         </div>
       `).join('')}
     </div>
@@ -1645,12 +1837,12 @@ async function calcularProluna(){
     box.innerHTML = `
       <div style="margin-bottom:6px;"><strong style="color:var(--partil);">Proluna</strong> — ${data.escala}</div>
       <div class="puntos-carta">
-        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${data.grado.toFixed(2)}°</div></div>
+        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${dms(data.grado)}</div></div>
         <div class="punto-item"><div class="nombre">Casa natal</div><div class="valor">${data.casa_natal}ª</div></div>
         <div class="punto-item"><div class="nombre">Edad exacta</div><div class="valor">${data.edad_anios.toFixed(2)} años</div></div>
       </div>
       <div style="margin-top:8px;">${botonLeerEvento('Proluna',
-        `Proluna ${data.escala} ubica a la persona en Casa ${data.casa_natal} (posición ${data.signo} ${data.grado.toFixed(2)}°) a la edad exacta ${data.edad_anios.toFixed(2)} años, para la fecha ${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}.`)}</div>
+        `Proluna ${data.escala} ubica a la persona en Casa ${data.casa_natal} (posición ${data.signo} ${dms(data.grado)}) a la edad exacta ${data.edad_anios.toFixed(2)} años, para la fecha ${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}.`)}</div>
     `;
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
@@ -1688,12 +1880,12 @@ async function calcularResona(){
     box.innerHTML = `
       <div style="margin-bottom:6px;"><strong style="color:var(--partil);">RSN</strong> — ${data.escala}</div>
       <div class="puntos-carta">
-        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${data.grado.toFixed(2)}°</div></div>
+        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${dms(data.grado)}</div></div>
         <div class="punto-item"><div class="nombre">Casa (de la RS)</div><div class="valor">${data.casa_rsn}ª</div></div>
       </div>
       <div style="color:var(--teal);font-size:.85em;margin-top:6px;">Revolución Solar base: ${data.revolucion_solar_base.year}-${String(data.revolucion_solar_base.month).padStart(2,'0')}-${String(data.revolucion_solar_base.day).padStart(2,'0')} · siguiente: ${data.revolucion_solar_siguiente.year}-${String(data.revolucion_solar_siguiente.month).padStart(2,'0')}-${String(data.revolucion_solar_siguiente.day).padStart(2,'0')}</div>
       <div style="margin-top:8px;">${botonLeerEvento('RSN (Revolución Solar en nacimiento)',
-        `RSN ${data.escala} ubica a la persona en Casa ${data.casa_rsn} (posición ${data.signo} ${data.grado.toFixed(2)}°) de la Revolución Solar base del ${data.revolucion_solar_base.year}-${String(data.revolucion_solar_base.month).padStart(2,'0')}-${String(data.revolucion_solar_base.day).padStart(2,'0')}, para la fecha ${payload.year}-${String(payload.month).padStart(2,'0')}-${String(payload.day).padStart(2,'0')}.`)}</div>
+        `RSN ${data.escala} ubica a la persona en Casa ${data.casa_rsn} (posición ${data.signo} ${dms(data.grado)}) de la Revolución Solar base del ${data.revolucion_solar_base.year}-${String(data.revolucion_solar_base.month).padStart(2,'0')}-${String(data.revolucion_solar_base.day).padStart(2,'0')}, para la fecha ${payload.year}-${String(payload.month).padStart(2,'0')}-${String(payload.day).padStart(2,'0')}.`)}</div>
     `;
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
@@ -1714,12 +1906,12 @@ async function calcularReluna(){
     box.innerHTML = `
       <div style="margin-bottom:6px;"><strong style="color:var(--partil);">RLN</strong> — ${data.escala}</div>
       <div class="puntos-carta">
-        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${data.grado.toFixed(2)}°</div></div>
+        <div class="punto-item"><div class="nombre">Posición</div><div class="valor">${data.signo} ${dms(data.grado)}</div></div>
         <div class="punto-item"><div class="nombre">Casa (de la RL)</div><div class="valor">${data.casa_rln}ª</div></div>
       </div>
       <div style="color:var(--teal);font-size:.85em;margin-top:6px;">Revolución Lunar base: ${data.revolucion_lunar_base.year}-${String(data.revolucion_lunar_base.month).padStart(2,'0')}-${String(data.revolucion_lunar_base.day).padStart(2,'0')} · siguiente: ${data.revolucion_lunar_siguiente.year}-${String(data.revolucion_lunar_siguiente.month).padStart(2,'0')}-${String(data.revolucion_lunar_siguiente.day).padStart(2,'0')}</div>
       <div style="margin-top:8px;">${botonLeerEvento('RLN (Revolución Lunar en nacimiento)',
-        `RLN ${data.escala} ubica a la persona en Casa ${data.casa_rln} (posición ${data.signo} ${data.grado.toFixed(2)}°) de la Revolución Lunar base del ${data.revolucion_lunar_base.year}-${String(data.revolucion_lunar_base.month).padStart(2,'0')}-${String(data.revolucion_lunar_base.day).padStart(2,'0')}, para la fecha ${payload.year}-${String(payload.month).padStart(2,'0')}-${String(payload.day).padStart(2,'0')}.`)}</div>
+        `RLN ${data.escala} ubica a la persona en Casa ${data.casa_rln} (posición ${data.signo} ${dms(data.grado)}) de la Revolución Lunar base del ${data.revolucion_lunar_base.year}-${String(data.revolucion_lunar_base.month).padStart(2,'0')}-${String(data.revolucion_lunar_base.day).padStart(2,'0')}, para la fecha ${payload.year}-${String(payload.month).padStart(2,'0')}-${String(payload.day).padStart(2,'0')}.`)}</div>
     `;
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
@@ -1760,8 +1952,8 @@ async function calcularRectificarProluna(){
     let html = `<p style="color:var(--teal);font-size:.85em;">${data.total_candidatos} hora(s) candidata(s) evaluadas — mejores 15 por orbe:</p>`;
     html += '<table><thead><tr><th>Hora candidata</th><th>Proluna directa</th><th>Proluna conversa</th><th>Diferencia</th><th>Aspecto</th><th>Orbe</th><th>Leer</th></tr></thead><tbody>';
     for(const c of data.mejores){
-      const descripcion = `Candidata a hora de nacimiento ${c.hora_candidata}: Proluna directa (${c.proluna_directa.signo} ${c.proluna_directa.grado.toFixed(2)}°) vs. Proluna conversa (${c.proluna_conversa.signo} ${c.proluna_conversa.grado.toFixed(2)}°) en aspecto de ${c.aspecto_mas_cercano}° con orbe ${c.orbe.toFixed(3)}°, evaluada contra el evento conocido del ${document.getElementById('rpEvFecha').value}.`;
-      html += `<tr><td>${c.hora_candidata}</td><td>${c.proluna_directa.signo} ${c.proluna_directa.grado.toFixed(2)}°</td><td>${c.proluna_conversa.signo} ${c.proluna_conversa.grado.toFixed(2)}°</td><td>${c.diferencia_grados.toFixed(3)}°</td><td>${c.aspecto_mas_cercano}°</td><td>${c.orbe.toFixed(3)}°</td><td>${botonLeerEvento('Rectificación por Proluna', descripcion)}</td></tr>`;
+      const descripcion = `Candidata a hora de nacimiento ${c.hora_candidata}: Proluna directa (${c.proluna_directa.signo} ${dms(c.proluna_directa.grado)}) vs. Proluna conversa (${c.proluna_conversa.signo} ${dms(c.proluna_conversa.grado)}) en aspecto de ${c.aspecto_mas_cercano}° con orbe ${dms(c.orbe)}, evaluada contra el evento conocido del ${document.getElementById('rpEvFecha').value}.`;
+      html += `<tr><td>${c.hora_candidata}</td><td>${c.proluna_directa.signo} ${dms(c.proluna_directa.grado)}</td><td>${c.proluna_conversa.signo} ${dms(c.proluna_conversa.grado)}</td><td>${dms(c.diferencia_grados)}</td><td>${c.aspecto_mas_cercano}°</td><td>${dms(c.orbe)}</td><td>${botonLeerEvento('Rectificación por Proluna', descripcion)}</td></tr>`;
     }
     html += '</tbody></table>';
     html += `<p style="margin-top:10px;font-size:.75em;color:var(--teal);">${data.nota}</p>`;
@@ -1829,7 +2021,7 @@ async function calcularMellizos(){
       const orbeGrados = r.diferencia_arco_segundos / 3600;
       html += `<tr>
         <td><strong style="color:var(--gold);">${horaStr}</strong></td>
-        <td>${r.diferencia_arco_segundos}"</td>
+        <td>${dms(r.diferencia_arco_segundos/3600, 1)}</td>
         <td style="font-size:.85em;">${retornoStr}</td>
         <td style="font-size:.85em;">${r.referencia.etiqueta}</td>
         <td style="font-size:.85em;">${ptStr}</td>
@@ -1915,8 +2107,8 @@ function tablaCoincidencias(coincidencias, tecnica, mismoIndividuo){
     const nombreA = esCruzada ? (String(c.cuerpo_A||'').split('.')[0].trim() || 'Persona A') : null;
     const nombreB = esCruzada ? (String(c.cuerpo_B||'').split('.')[0].trim() || 'Persona B') : null;
     html += `<tr>
-      <td>${c.cuerpo_A} <span style="color:var(--teal);font-size:.85em;">(${c.signo_A} ${c.grado_A.toFixed(2)}°)</span></td>
-      <td>${c.cuerpo_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${c.grado_B.toFixed(2)}°)</span></td>
+      <td>${c.cuerpo_A} <span style="color:var(--teal);font-size:.85em;">(${c.signo_A} ${dms(c.grado_A)})</span></td>
+      <td>${c.cuerpo_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${dms(c.grado_B)})</span></td>
       <td>${c.aspecto}</td>
       <td>${c.orbe}°</td>
       <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
@@ -1978,7 +2170,7 @@ async function calcularSinastriaRetornos(){
 }
 
 function filaPunto(nombre, p){
-  return `<tr><td>${nombre}</td><td>${p.signo} ${p.grado.toFixed(2)}°</td></tr>`;
+  return `<tr><td>${nombre}</td><td>${p.signo} ${dms(p.grado)}</td></tr>`;
 }
 
 async function calcularProgresiones(){
@@ -2118,7 +2310,7 @@ async function calcularDiagramaArcoSolar(){
           <td>${e.edad_anios.toFixed(2)} años</td>
           <td>${e.fecha.year}-${String(e.fecha.month).padStart(2,'0')}-${String(e.fecha.day).padStart(2,'0')}</td>
           <td>${e.aspecto}</td>
-          <td>${e.cuerpo_natal} <span style="color:var(--teal);font-size:.85em;">(${e.signo_natal} ${e.grado_natal.toFixed(2)}°)</span></td>
+          <td>${e.cuerpo_natal} <span style="color:var(--teal);font-size:.85em;">(${e.signo_natal} ${dms(e.grado_natal)})</span></td>
         </tr>`;
       }
       html += '</tbody></table>';
@@ -2153,7 +2345,7 @@ async function calcularEstrellasNatal(){
       html += '<table><thead><tr><th>Punto natal</th><th>Estrella</th><th>Posición</th><th>Orbe</th><th>Leer</th></tr></thead><tbody>';
       for(const p of puntos){
         for(const est of data.conjunciones[p]){
-          html += `<tr><td>${NOMBRES_PUNTOS[p]||p}</td><td>${est.estrella}</td><td>${est.signo} ${est.grado.toFixed(2)}°</td><td>${est.orbe}°</td><td>${botonLeerAspecto(p, est.estrella.toLowerCase(), 'Conjunción', est.orbe, 'Estrellas Fijas')}</td></tr>`;
+          html += `<tr><td>${NOMBRES_PUNTOS[p]||p}</td><td>${est.estrella}</td><td>${est.signo} ${dms(est.grado)}</td><td>${dms(est.orbe)}</td><td>${botonLeerAspecto(p, est.estrella.toLowerCase(), 'Conjunción', est.orbe, 'Estrellas Fijas')}</td></tr>`;
         }
       }
       html += '</tbody></table>';
@@ -2190,7 +2382,7 @@ async function calcularDiagramaEstrellas(){
           <td>${e.edad_anios.toFixed(2)} años</td>
           <td>${e.fecha.year}-${String(e.fecha.month).padStart(2,'0')}-${String(e.fecha.day).padStart(2,'0')}</td>
           <td>${e.estrella}</td>
-          <td>${e.signo} ${e.grado.toFixed(2)}°</td>
+          <td>${e.signo} ${dms(e.grado)}</td>
           <td>${botonLeerAspecto('sol', e.estrella.toLowerCase(), 'Conjunción', 0, 'Estrellas Fijas (Sol dirigido por Arco Solar)')}</td>
         </tr>`;
       }
@@ -2238,7 +2430,7 @@ async function calcularRetornosMarte(){
       const cuandoTexto = ret.edad_anios < 0 ? 'pasado' : 'futuro';
       html += `<div style="margin:14px 0;padding:10px;border:1px solid var(--border);border-radius:8px;">
         <p style="margin:0 0 6px;"><strong>${ret.fecha_local.year}-${String(ret.fecha_local.month).padStart(2,'0')}-${String(ret.fecha_local.day).padStart(2,'0')}</strong>
-          <span style="color:var(--teal);font-size:.85em;"> (${cuandoTexto}, edad ${ret.edad_anios.toFixed(2)} años) — Ascendente ${ret.ascendente.signo} ${ret.ascendente.grado.toFixed(2)}°, Ecuador Celeste ${ret.ecuador_celeste.signo} ${ret.ecuador_celeste.grado.toFixed(2)}°</span></p>
+          <span style="color:var(--teal);font-size:.85em;"> (${cuandoTexto}, edad ${ret.edad_anios.toFixed(2)} años) — Ascendente ${ret.ascendente.signo} ${dms(ret.ascendente.grado)}, Ecuador Celeste ${ret.ecuador_celeste.signo} ${dms(ret.ecuador_celeste.grado)}</span></p>
         ${ret.coincidencias.length ? tablaCoincidencias(ret.coincidencias, 'Retornos de Marte') : '<p style="margin:0;">Sin aspectos dentro del orbe contra la carta natal.</p>'}
       </div>`;
     }
@@ -2255,7 +2447,7 @@ function renderCasaPeriodo(cp){
   for(const c of cp.casas){
     if(!c.puntos.length) continue;
     html += `<p style="margin:2px 0;font-size:.8em;"><strong>Casa ${c.casa}</strong> (años ${c.anio_desde} a ${c.anio_hasta} del ciclo): `
-      + c.puntos.map(p=>`${p.punto} (${p.origen}) en ${p.signo} ${p.grado.toFixed(2)}°`).join(', ') + '</p>';
+      + c.puntos.map(p=>`${p.punto} (${p.origen}) en ${p.signo} ${dms(p.grado)}`).join(', ') + '</p>';
   }
   html += `<p style="margin:6px 0 0;font-size:.75em;color:var(--teal);">${cp.nota}</p></div>`;
   return html;
@@ -2286,7 +2478,7 @@ async function _calcularRetornoLento(prefijo, ruta, casaPeriodoId, nombreTecnica
       const cuandoTexto = ret.edad_anios < 0 ? 'pasado' : 'futuro';
       html += `<div style="margin:14px 0;padding:10px;border:1px solid var(--border);border-radius:8px;">
         <p style="margin:0 0 6px;"><strong>${ret.fecha_local.year}-${String(ret.fecha_local.month).padStart(2,'0')}-${String(ret.fecha_local.day).padStart(2,'0')}</strong>
-          <span style="color:var(--teal);font-size:.85em;"> (${cuandoTexto}, edad ${ret.edad_anios.toFixed(2)} años) — Ascendente ${ret.ascendente.signo} ${ret.ascendente.grado.toFixed(2)}°, Ecuador Celeste ${ret.ecuador_celeste.signo} ${ret.ecuador_celeste.grado.toFixed(2)}°</span></p>
+          <span style="color:var(--teal);font-size:.85em;"> (${cuandoTexto}, edad ${ret.edad_anios.toFixed(2)} años) — Ascendente ${ret.ascendente.signo} ${dms(ret.ascendente.grado)}, Ecuador Celeste ${ret.ecuador_celeste.signo} ${dms(ret.ecuador_celeste.grado)}</span></p>
         ${ret.coincidencias.length ? tablaCoincidencias(ret.coincidencias, nombreTecnica.replace(/^retornos de /i, 'Retornos de ')) : '<p style="margin:0;">Sin aspectos dentro del orbe contra la carta natal.</p>'}
         ${renderCasaPeriodo(ret.casa_periodo)}
       </div>`;
@@ -2348,7 +2540,7 @@ async function calcularContacto(){
       for(const c of data.coincidencias){
         html += `<tr>
           <td>${c.punto_A}</td>
-          <td>${c.referencia_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${c.grado_B.toFixed(2)}°)</span></td>
+          <td>${c.referencia_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${dms(c.grado_B)})</span></td>
           <td>${c.aspecto}</td>
           <td>${c.orbe}°</td>
           <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
@@ -2445,7 +2637,7 @@ async function calcularCotidianCardinal(){
       for(const c of data.coincidencias){
         html += `<tr>
           <td>${c.punto_A}</td>
-          <td>${c.referencia_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${c.grado_B.toFixed(2)}°)</span></td>
+          <td>${c.referencia_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${dms(c.grado_B)})</span></td>
           <td>${c.aspecto}</td>
           <td>${c.orbe}°</td>
           <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
@@ -2516,14 +2708,14 @@ function fechaHtmlCarta(fl){
 function renderCartaAnaloga(c){
   let angulos = '';
   if(c.ascendente){
-    angulos = ` — Asc ${c.ascendente.signo} ${c.ascendente.grado.toFixed(2)}°, MC ${c.mc.signo} ${c.mc.grado.toFixed(2)}°`;
+    angulos = ` — Asc ${c.ascendente.signo} ${dms(c.ascendente.grado)}, MC ${c.mc.signo} ${dms(c.mc.grado)}`;
   }
   const fechaTxt = fechaHtmlCarta(c.fecha_local);
-  const descripcion = `Carta Análoga: la fecha ${fechaTxt} reproduce el mismo ${c.sistema_buscado} (objetivo ${c.objetivo_buscado.toFixed(4)}°) que la carta natal — Sol ${c.sol.signo} ${c.sol.grado.toFixed(4)}°, Luna ${c.luna.signo} ${c.luna.grado.toFixed(4)}°${c.ascendente ? `, Ascendente ${c.ascendente.signo} ${c.ascendente.grado.toFixed(2)}°, MC ${c.mc.signo} ${c.mc.grado.toFixed(2)}°` : ''}.`;
+  const descripcion = `Carta Análoga: la fecha ${fechaTxt} reproduce el mismo ${c.sistema_buscado} (objetivo ${dms(c.objetivo_buscado)}) que la carta natal — Sol ${c.sol.signo} ${dms(c.sol.grado)}, Luna ${c.luna.signo} ${dms(c.luna.grado)}${c.ascendente ? `, Ascendente ${c.ascendente.signo} ${dms(c.ascendente.grado)}, MC ${c.mc.signo} ${dms(c.mc.grado)}` : ''}.`;
   return `<div style="margin:10px 0;padding:10px;border:1px solid var(--border);border-radius:8px;">
     <p style="margin:0 0 4px;"><strong>${fechaTxt}</strong>
-      <span style="color:var(--teal);font-size:.8em;"> (buscado en ${c.sistema_buscado}, objetivo ${c.objetivo_buscado.toFixed(4)}°)</span></p>
-    <p style="margin:0;">Sol ${c.sol.signo} ${c.sol.grado.toFixed(4)}° · Luna ${c.luna.signo} ${c.luna.grado.toFixed(4)}°${angulos}</p>
+      <span style="color:var(--teal);font-size:.8em;"> (buscado en ${c.sistema_buscado}, objetivo ${dms(c.objetivo_buscado)})</span></p>
+    <p style="margin:0;">Sol ${c.sol.signo} ${dms(c.sol.grado)} · Luna ${c.luna.signo} ${dms(c.luna.grado)}${angulos}</p>
     <p style="margin:4px 0 0;">${botonLeerEvento('Cartas Análogas', descripcion)}</p>
   </div>`;
 }
@@ -2550,7 +2742,7 @@ async function calcularCartasAnalogas(){
     });
     const data = await resp.json();
     if(data.error){ box.innerHTML = `<p style="color:var(--danger);">${data.error}</p>`; return; }
-    let html = `<p style="margin:0 0 10px;"><strong>Natal:</strong> Sol ${data.natal.sol.signo} ${data.natal.sol.grado.toFixed(4)}° · Luna ${data.natal.luna.signo} ${data.natal.luna.grado.toFixed(4)}°</p>`;
+    let html = `<p style="margin:0 0 10px;"><strong>Natal:</strong> Sol ${data.natal.sol.signo} ${dms(data.natal.sol.grado)} · Luna ${data.natal.luna.signo} ${dms(data.natal.luna.grado)}</p>`;
     html += `<p style="color:var(--teal);font-size:.85em;">${data.total_cartas} cartas análogas encontradas${data.con_angulos ? '' : ' (sin Ascendente/MC: no se cargó latitud/longitud)'}.</p>`;
     if(data.cartas_hacia_atras.length){
       html += '<h3 style="margin:16px 0 4px;">Hacia atrás</h3>' + data.cartas_hacia_atras.map(renderCartaAnaloga).join('');
@@ -2588,7 +2780,7 @@ function renderVinculoHoraria(v){
   return `<tr>
     <td>${v.sistema}</td><td>${v.persona}</td><td>${v.pregunta}</td>
     <td style="color:${COLOR_FAMILIA_HORARIA[v.familia]};">${v.aspecto}${v.partil?' (partil)':''}</td>
-    <td class="orbe">${v.orbe.toFixed(3)}°</td>
+    <td class="orbe">${dms(v.orbe)}</td>
     <td>${botonLeerAspecto(claveHoraria(v.persona), claveHoraria(v.pregunta), v.aspecto, v.orbe, 'Astrología Horaria (vínculo directo)')}</td>
   </tr>`;
 }
@@ -2603,11 +2795,11 @@ function renderTransitoHoraria(t){
     grado = `${sentidoCorto} ~${gt.meses.toFixed(1)} meses <span style="opacity:.7;">o ${gt.anios.toFixed(1)} años</span>`;
   }
   const efem = t.fecha_exacta_efemeride ? `${fechaHtmlHoraria(t.fecha_exacta_efemeride)}` : '(no converge en la ventana pedida)';
-  const descripcionTransito = `Astrología Horaria — tránsito de un planeta lento: ${t.planeta} (${t.modo}) en ${t.aspecto}${t.partil?' partil':''} con ${t.punto} (sistema ${t.sistema}), orbe ${t.orbe.toFixed(3)}°, ${t.aplicando?'aplicando (viene)':'separando (ya pasó)'}${t.fecha_exacta_efemeride ? `, fecha exacta de efeméride de referencia ${fechaHtmlHoraria(t.fecha_exacta_efemeride)}` : ''}.`;
+  const descripcionTransito = `Astrología Horaria — tránsito de un planeta lento: ${t.planeta} (${t.modo}) en ${t.aspecto}${t.partil?' partil':''} con ${t.punto} (sistema ${t.sistema}), orbe ${dms(t.orbe)}, ${t.aplicando?'aplicando (viene)':'separando (ya pasó)'}${t.fecha_exacta_efemeride ? `, fecha exacta de efeméride de referencia ${fechaHtmlHoraria(t.fecha_exacta_efemeride)}` : ''}.`;
   return `<tr>
     <td>${t.sistema}</td><td>${t.punto}</td><td>${t.planeta} <span style="color:var(--teal);font-size:.8em;">(${t.modo})</span></td>
     <td style="color:${COLOR_FAMILIA_HORARIA[t.familia]};">${t.aspecto}${t.partil?' (partil)':''}</td>
-    <td class="orbe">${t.orbe.toFixed(3)}°</td>
+    <td class="orbe">${dms(t.orbe)}</td>
     <td>${botonLeerEvento('Astrología Horaria (tránsito)', descripcionTransito)}</td>
     <td style="font-size:.85em;" title="${gt ? gt.nota : ''}">${grado}<br><span style="opacity:.65;">${t.aplicando?'aplicando':'separando'}</span></td>
     <td style="font-size:.75em;color:var(--teal);" title="${t.fecha_exacta_efemeride_nota||''}">${efem}</td>
@@ -2643,9 +2835,9 @@ async function calcularHoraria(){
 
     let html = `<p style="margin:0 0 10px;"><strong>Momento de la pregunta:</strong> ${fechaHtmlHoraria(data.fecha_pregunta)}</p>`;
     html += '<h3 style="margin:16px 0 4px;">Puntos (Trópico)</h3><p style="margin:0;">';
-    html += Object.entries(data.puntos['trópico']).map(([k,v])=>`${v.signo} ${v.grado.toFixed(2)}°`).join(' · ');
+    html += Object.entries(data.puntos['trópico']).map(([k,v])=>`${v.signo} ${dms(v.grado)}`).join(' · ');
     html += '</p><h3 style="margin:16px 0 4px;">Puntos (Sideral)</h3><p style="margin:0;">';
-    html += Object.entries(data.puntos['sideral']).map(([k,v])=>`${v.signo} ${v.grado.toFixed(2)}°`).join(' · ');
+    html += Object.entries(data.puntos['sideral']).map(([k,v])=>`${v.signo} ${dms(v.grado)}`).join(' · ');
     html += '</p>';
 
     html += '<h3 style="margin:16px 0 4px;">Vínculo directo (persona ↔ pregunta)</h3>';
@@ -2674,12 +2866,12 @@ async function calcularHoraria(){
 function renderEventoOmega(e, ladoNombre){
   const hl = e.hora_local;
   const hora = `${String(hl.hour).padStart(2,'0')}:${String(hl.minute).padStart(2,'0')}:${String(hl.second).padStart(2,'0')}`;
-  const descripcion = `Programa Omega: ${e.cuerpo_en_transito} en tránsito hace conjunción exacta a las ${hora} con el grado del banco de ${e.origen_banco} (variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}, grado ${e.grado_banco.toFixed(3)}°)${ladoNombre ? ` — ${ladoNombre}` : ''}.`;
+  const descripcion = `Programa Omega: ${e.cuerpo_en_transito} en tránsito hace conjunción exacta a las ${hora} con el grado del banco de ${e.origen_banco} (variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}, grado ${dms(e.grado_banco)})${ladoNombre ? ` — ${ladoNombre}` : ''}.`;
   return `<tr>
     <td class="orbe">${hora}</td>
     <td>${e.cuerpo_en_transito}</td>
     <td>${e.origen_banco} <span style="color:var(--teal);font-size:.8em;">(${e.variante_origen})</span></td>
-    <td class="orbe">${e.grado_banco.toFixed(3)}°</td>
+    <td class="orbe">${dms(e.grado_banco)}</td>
     <td style="font-size:.8em;">${fechaHtmlHoraria(e.fecha_origen)}</td>
     <td>${botonLeerEvento('Programa Omega', descripcion)}</td>
   </tr>`;
@@ -2799,12 +2991,12 @@ async function compararOmega(){
 function renderEventoImantacion(e){
   const hl = e.hora_local;
   const hora = `${String(hl.hour).padStart(2,'0')}:${String(hl.minute).padStart(2,'0')}:${String(hl.second).padStart(2,'0')}`;
-  const descripcion = `Imantación: ${e.cuerpo_en_transito} en tránsito hace conjunción exacta a las ${hora} con el grado del banco de ${e.origen_banco} (base ${e.base_origen}, variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}, grado ${e.grado_banco.toFixed(3)}°).`;
+  const descripcion = `Imantación: ${e.cuerpo_en_transito} en tránsito hace conjunción exacta a las ${hora} con el grado del banco de ${e.origen_banco} (base ${e.base_origen}, variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}, grado ${dms(e.grado_banco)}).`;
   return `<tr>
     <td class="orbe">${hora}</td>
     <td>${e.cuerpo_en_transito}</td>
     <td>${e.origen_banco} <span style="color:var(--gold);font-size:.8em;">(${e.base_origen})</span> <span style="color:var(--teal);font-size:.8em;">(${e.variante_origen})</span></td>
-    <td class="orbe">${e.grado_banco.toFixed(3)}°</td>
+    <td class="orbe">${dms(e.grado_banco)}</td>
     <td style="font-size:.8em;">${fechaHtmlHoraria(e.fecha_origen)}</td>
     <td>${botonLeerEvento('Imantación', descripcion)}</td>
   </tr>`;
@@ -2916,10 +3108,10 @@ async function calcularElectiva(){
 function renderEventoManchaSolar(e){
   const hl = e.hora_local;
   const fecha = `${hl.year}-${String(hl.month).padStart(2,'0')}-${String(hl.day).padStart(2,'0')} ${String(hl.hour).padStart(2,'0')}:${String(hl.minute).padStart(2,'0')}:${String(hl.second).padStart(2,'0')}`;
-  const descripcion = `Manchas Solares: el Sol real entra en oposición exacta a las ${fecha} con un Sol del banco (grado ${e.grado_banco.toFixed(3)}°, variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}).`;
+  const descripcion = `Manchas Solares: el Sol real entra en oposición exacta a las ${fecha} con un Sol del banco (grado ${dms(e.grado_banco)}, variante ${e.variante_origen}, Fecha Gemela de origen ${fechaHtmlHoraria(e.fecha_origen)}).`;
   return `<tr>
     <td class="orbe">${fecha}</td>
-    <td class="orbe">${e.grado_banco.toFixed(3)}°</td>
+    <td class="orbe">${dms(e.grado_banco)}</td>
     <td style="font-size:.85em;color:var(--teal);">${e.variante_origen}</td>
     <td style="font-size:.8em;">${fechaHtmlHoraria(e.fecha_origen)}</td>
     <td>${botonLeerEvento('Manchas Solares', descripcion)}</td>
@@ -3007,8 +3199,8 @@ function renderPosicionDiscriminacion(p, nombreA, nombreB){
       : '';
     return `<tr>
       <td>${a.puntos}</td>
-      <td class="orbe" style="${colorA}">${oa.toFixed(3)}°</td>
-      <td class="orbe" style="${colorB}">${ob.toFixed(3)}°</td>
+      <td class="orbe" style="${colorA}">${dms(oa)}</td>
+      <td class="orbe" style="${colorB}">${dms(ob)}</td>
       <td style="font-size:.85em;color:var(--teal);">${a.corresponde_a}</td>
       <td>${leer}</td>
     </tr>`;
@@ -3103,10 +3295,10 @@ async function calcularPronostico(){
       html += `<tr class="${e.partil?'partil':''}">
         <td>${e.edad_anios}</td>
         <td style="font-size:.8em;">${e.conversa?'conversa':'directa'}</td>
-        <td>${e.punto_progresado} <span style="color:var(--teal);font-size:.8em;">(${e.signo_progresado} ${e.grado_progresado.toFixed(2)}°)</span></td>
+        <td>${e.punto_progresado} <span style="color:var(--teal);font-size:.8em;">(${e.signo_progresado} ${dms(e.grado_progresado)})</span></td>
         <td>${e.aspecto}</td>
-        <td>${e.punto_natal} <span style="color:var(--teal);font-size:.8em;">(${e.signo_natal} ${e.grado_natal.toFixed(2)}°)</span></td>
-        <td class="orbe">${e.orbe.toFixed(3)}°</td>
+        <td>${e.punto_natal} <span style="color:var(--teal);font-size:.8em;">(${e.signo_natal} ${dms(e.grado_natal)})</span></td>
+        <td class="orbe">${dms(e.orbe)}</td>
         <td style="font-size:.78em;color:${e.nota?'var(--gold)':'var(--teal)'};">${e.nota||''}</td>
         <td>${botonLeerAspecto(e.punto_progresado, e.punto_natal, e.aspecto, e.orbe, 'Antivértex — Pronóstico de Nacimientos y Mudanza')}</td>
       </tr>`;
@@ -3154,7 +3346,7 @@ async function calcularEventosVida(){
           <td style="font-size:.78em;color:var(--teal);">${r.variante}</td>
           <td>${r.objetivo}</td>
           <td>${r.aspecto}</td>
-          <td class="orbe">${r.orbe.toFixed(3)}°</td>
+          <td class="orbe">${dms(r.orbe)}</td>
           <td style="font-size:.78em;color:var(--teal);font-style:italic;">${r.cita || ''}</td>
         </tr>`;
       }
@@ -3210,13 +3402,13 @@ async function calcularLoteriaSemanal(){
     });
     const data = await resp.json();
     if(data.error){ box.innerHTML = `<p style="color:var(--danger);">${data.error}</p>`; return; }
-    let html = `<p style="color:var(--teal);font-size:.85em;">Plutón Heliocéntrico Trópico de la semana: ${data.pluton_helio_tropico.inicio.toFixed(3)}° → ${data.pluton_helio_tropico.fin.toFixed(3)}°</p>`;
+    let html = `<p style="color:var(--teal);font-size:.85em;">Plutón Heliocéntrico Trópico de la semana: ${dms(data.pluton_helio_tropico.inicio)} → ${dms(data.pluton_helio_tropico.fin)}</p>`;
     html += '<h4 style="color:var(--gold);margin:14px 0 6px;">Favorecidos</h4>';
     if(data.favorecidos.length){
       html += '<table><thead><tr><th>Número</th><th>Mejor aspecto</th><th>Orbe</th><th>Momento</th><th>Leer</th></tr></thead><tbody>';
       for(const f of data.favorecidos){
-        const descripcion = `Lotería (Programa Omega), número favorecido: el número ${f.numero} tiene su mejor aspecto, ${f.hits[0].aspecto} (orbe ${f.hits[0].orbe.toFixed(3)}°) con el Plutón Heliocéntrico Trópico de la semana evaluada, en el momento ${f.hits[0].momento}.`;
-        html += `<tr><td>${f.numero}</td><td>${f.hits[0].aspecto}</td><td class="orbe">${f.hits[0].orbe.toFixed(3)}°</td><td style="font-size:.8em;">${f.hits[0].momento}</td><td>${botonLeerEvento('Lotería (Programa Omega)', descripcion)}</td></tr>`;
+        const descripcion = `Lotería (Programa Omega), número favorecido: el número ${f.numero} tiene su mejor aspecto, ${f.hits[0].aspecto} (orbe ${dms(f.hits[0].orbe)}) con el Plutón Heliocéntrico Trópico de la semana evaluada, en el momento ${f.hits[0].momento}.`;
+        html += `<tr><td>${f.numero}</td><td>${f.hits[0].aspecto}</td><td class="orbe">${dms(f.hits[0].orbe)}</td><td style="font-size:.8em;">${f.hits[0].momento}</td><td>${botonLeerEvento('Lotería (Programa Omega)', descripcion)}</td></tr>`;
       }
       html += '</tbody></table>';
     } else {
@@ -3226,8 +3418,8 @@ async function calcularLoteriaSemanal(){
     if(data.negados.length){
       html += '<table><thead><tr><th>Número</th><th>Aspecto</th><th>Orbe</th><th>Momento</th><th>Leer</th></tr></thead><tbody>';
       for(const f of data.negados){
-        const descripcion = `Lotería (Programa Omega), número negado (a evitar): el número ${f.numero} tiene ${f.hits[0].aspecto} (orbe ${f.hits[0].orbe.toFixed(3)}°) con el Plutón Heliocéntrico Trópico de la semana evaluada, en el momento ${f.hits[0].momento}.`;
-        html += `<tr><td>${f.numero}</td><td>${f.hits[0].aspecto}</td><td class="orbe">${f.hits[0].orbe.toFixed(3)}°</td><td style="font-size:.8em;">${f.hits[0].momento}</td><td>${botonLeerEvento('Lotería (Programa Omega)', descripcion)}</td></tr>`;
+        const descripcion = `Lotería (Programa Omega), número negado (a evitar): el número ${f.numero} tiene ${f.hits[0].aspecto} (orbe ${dms(f.hits[0].orbe)}) con el Plutón Heliocéntrico Trópico de la semana evaluada, en el momento ${f.hits[0].momento}.`;
+        html += `<tr><td>${f.numero}</td><td>${f.hits[0].aspecto}</td><td class="orbe">${dms(f.hits[0].orbe)}</td><td style="font-size:.8em;">${f.hits[0].momento}</td><td>${botonLeerEvento('Lotería (Programa Omega)', descripcion)}</td></tr>`;
       }
       html += '</tbody></table>';
     } else {

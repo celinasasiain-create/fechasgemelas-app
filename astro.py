@@ -747,7 +747,7 @@ def comparar_retorno_marte_vs_natal(retorno_marte, carta_natal, nombre_natal="Na
 
 
 def rectificar_por_luna(year, month, day, hour_aprox, minute_aprox, utc_offset,
-                         lon_referencia, sideral=True, ventana_horas=2, aspecto_objetivo=None):
+                         lon_referencia, sideral=True, ventana_horas=2, aspecto_objetivo=None, second=0):
     """Técnica de rectificación de Bonito (caso Columbia): ajusta la HORA
     exacta de un evento hasta que la Luna en tránsito (Sideral por defecto,
     como en el ejemplo de Bonito) haga aspecto PARTIL con una posición de
@@ -755,7 +755,7 @@ def rectificar_por_luna(year, month, day, hour_aprox, minute_aprox, utc_offset,
     Devuelve, para cada aspecto mayor posible, el horario exacto donde ocurre
     dentro de la ventana pedida (la Luna se mueve rápido: ~0.5°/hora, así que
     esto sí permite afinar minutos/segundos, a diferencia de comparar Soles)."""
-    jd_centro = jd_from_local(year, month, day, hour_aprox, minute_aprox, utc_offset)
+    jd_centro = jd_from_local(year, month, day, hour_aprox, minute_aprox, utc_offset) + (second or 0) / 86400.0
     jd_ini = jd_centro - ventana_horas / 24.0
     jd_fin = jd_centro + ventana_horas / 24.0
 
