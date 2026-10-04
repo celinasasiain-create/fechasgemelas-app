@@ -1019,7 +1019,19 @@ def api_interpretar():
     siguiendo el estilo/método de Bonito (ver interpretacion.py); si
     tampoco hay IA disponible, la lectura general de categoría de cada
     punto. El campo 'fuente' de la respuesta dice siempre cuál de las tres
-    se usó."""
+    se usó.
+
+    'mismo_individuo' (opcional, default true): si los dos puntos vienen de
+    la carta de una sola persona (Progresiones, Retornos, Antivértex, o una
+    fila de Comparar Fechas Gemelas donde nombre_A == nombre_B) o de dos
+    personas distintas (Sinastría, Contacto, Discriminación, Mellizos, o
+    una fila de Comparar Fechas Gemelas entre dos personas con nombres
+    distintos). Los marcadores fijos de Hugo están documentados siempre
+    para una sola carta, así que cuando mismo_individuo=false la app los
+    salta a propósito y arma una lectura de vínculo (sinastría) en vez de
+    aplicar, fuera de contexto, una lectura de personalidad individual a
+    una comparación entre dos personas. 'nombre_a'/'nombre_b' (opcionales)
+    se usan para nombrar a cada persona en esa lectura de vínculo."""
     data = request.get_json(force=True)
     required = ["punto_a", "punto_b", "aspecto", "orbe"]
     for r in required:
@@ -1028,6 +1040,8 @@ def api_interpretar():
     resultado = interpretar_aspecto(
         data["punto_a"], data["punto_b"], data["aspecto"], data["orbe"],
         tecnica=data.get("tecnica", "Fechas Gemelas (comparación de cartas)"),
+        mismo_individuo=data.get("mismo_individuo", True),
+        nombre_a=data.get("nombre_a"), nombre_b=data.get("nombre_b"),
     )
     return jsonify(resultado)
 

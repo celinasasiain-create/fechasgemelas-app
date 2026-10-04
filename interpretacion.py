@@ -125,39 +125,82 @@ def _llamar_ia(descripcion_evento, contexto_extra=""):
         return None
 
 
-def _descripcion_aspecto(puntoA, puntoB, aspecto, orbe, tecnica):
+def _descripcion_aspecto(puntoA, puntoB, aspecto, orbe, tecnica, mismo_individuo=True,
+                          nombre_a=None, nombre_b=None):
     orbe_txt = f"{orbe:.4f}°" if isinstance(orbe, (int, float)) else str(orbe)
+    if mismo_individuo:
+        return (
+            f"Técnica: {tecnica}. Aspecto: {puntoA} en {aspecto} con {puntoB}, "
+            f"orbe {orbe_txt}, dentro de la carta de UNA sola persona. Escribí la "
+            f"lectura de este aspecto puntual (personalidad/destino propio, no un "
+            f"vínculo entre dos personas)."
+        )
+    etiqueta_a = nombre_a or "la Persona A"
+    etiqueta_b = nombre_b or "la Persona B"
     return (
-        f"Técnica: {tecnica}. Aspecto: {puntoA} en {aspecto} con {puntoB}, "
-        f"orbe {orbe_txt}. Escribí la lectura de este aspecto puntual."
+        f"Técnica: {tecnica}. Aspecto de SINASTRÍA entre dos personas distintas: "
+        f"el {puntoA} de {etiqueta_a} está en {aspecto} con el {puntoB} de {etiqueta_b}, "
+        f"orbe {orbe_txt}. Escribí una lectura de vínculo (cómo esa energía de "
+        f"{etiqueta_a} se relaciona con esa energía de {etiqueta_b}), NO una lectura "
+        f"de personalidad individual — no le atribuyas a una sola persona lo que "
+        f"describe la relación entre ambas."
     )
 
 
-def interpretar_aspecto(puntoA, puntoB, aspecto, orbe, tecnica="Fechas Gemelas", usar_ia=True):
+def _lectura_general_cruzada(puntoA, puntoB):
+    """Lectura de categoría (sin marcador) para un aspecto entre puntos de
+    DOS personas distintas — usa solo CATEGORIA_PUNTO, nunca
+    MARCADORES_ESPECIFICOS (esos están documentados por Hugo para la carta
+    de una sola persona, no para un cruce de sinastría)."""
+    generales = []
+    for p in (puntoA, puntoB):
+        if p in CATEGORIA_PUNTO:
+            generales.append({"punto": p, "lectura_general": CATEGORIA_PUNTO[p]})
+    return generales
+
+
+def interpretar_aspecto(puntoA, puntoB, aspecto, orbe, tecnica="Fechas Gemelas", usar_ia=True,
+                         mismo_individuo=True, nombre_a=None, nombre_b=None):
     """Interpretación para un evento de dos puntos + aspecto + orbe (el caso
     más común: Fechas Gemelas, Horaria, Discriminación por orbe, Retornos).
     Devuelve siempre un dict con 'texto' y 'fuente' ('marcador_hugo',
     'ia_estilo_bonito' o 'lectura_general'). 'usar_ia=False' salta el
     llamado a la API (para listas largas de eventos, donde solo conviene
     generar con IA los primeros N más relevantes — ver LIMITE_IA_POR_LISTA
-    en las rutas de app.py)."""
-    fijo = _interpretar_fijo(puntoA, puntoB, aspecto, orbe)
-    if fijo["tipo"] == "marcador_especifico":
-        textos = [r["texto"] for r in fijo["resultados"]]
-        fuentes = sorted({r["fuente"] for r in fijo["resultados"]})
-        confianzas = sorted({r["confianza"] for r in fijo["resultados"]})
-        return {
-            "texto": " / ".join(textos),
-            "fuente": "marcador_hugo",
-            "detalle_fuente": ", ".join(fuentes),
-            "confianza": ", ".join(confianzas),
-        }
+    en las rutas de app.py).
 
-    texto_ia = _llamar_ia(_descripcion_aspecto(puntoA, puntoB, aspecto, orbe, tecnica)) if usar_ia else None
+    'mismo_individuo' distingue si los dos puntos pertenecen a la carta de
+    UNA sola persona (True, el caso de Progresiones, Arco Solar, Retornos,
+    Antivértex, etc.) o si vienen de DOS personas distintas (False: una
+    fila de sinastría dentro de Comparar Fechas Gemelas, Sinastría,
+    Contacto, Discriminación por orbe, Mellizos). Los marcadores fijos de
+    diccionario.py (MARCADORES_ESPECIFICOS) fueron documentados por Hugo
+    siempre para la carta de una sola persona — cuando mismo_individuo es
+    False, se saltan a propósito (no corresponden a un cruce entre dos
+    cartas) y se va directo a una lectura de sinastría generada por IA, o
+    si no hay IA, a la lectura general de categoría de cada punto."""
+    if mismo_individuo:
+        fijo = _interpretar_fijo(puntoA, puntoB, aspecto, orbe)
+        if fijo["tipo"] == "marcador_especifico":
+            textos = [r["texto"] for r in fijo["resultados"]]
+            fuentes = sorted({r["fuente"] for r in fijo["resultados"]})
+            confianzas = sorted({r["confianza"] for r in fijo["resultados"]})
+            return {
+                "texto": " / ".join(textos),
+                "fuente": "marcador_hugo",
+                "detalle_fuente": ", ".join(fuentes),
+                "confianza": ", ".join(confianzas),
+            }
+        generales = fijo["resultados"]
+    else:
+        generales = _lectura_general_cruzada(puntoA, puntoB)
+
+    texto_ia = _llamar_ia(_descripcion_aspecto(
+        puntoA, puntoB, aspecto, orbe, tecnica, mismo_individuo, nombre_a, nombre_b,
+    )) if usar_ia else None
     if texto_ia:
         return {"texto": texto_ia, "fuente": "ia_estilo_bonito", "detalle_fuente": ANTHROPIC_MODEL}
 
-    generales = fijo["resultados"]
     if generales:
         texto = " ".join(f"{g['punto'].capitalize()}: {g['lectura_general']}" for g in generales)
     else:
