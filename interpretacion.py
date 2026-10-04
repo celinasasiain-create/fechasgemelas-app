@@ -202,7 +202,22 @@ def interpretar_aspecto(puntoA, puntoB, aspecto, orbe, tecnica="Fechas Gemelas",
         return {"texto": texto_ia, "fuente": "ia_estilo_bonito", "detalle_fuente": ANTHROPIC_MODEL}
 
     if generales:
-        texto = " ".join(f"{g['punto'].capitalize()}: {g['lectura_general']}" for g in generales)
+        if mismo_individuo or len(generales) < 2:
+            texto = " ".join(f"{g['punto'].capitalize()}: {g['lectura_general']}" for g in generales)
+        else:
+            # Dos personas distintas: en vez de pegar las dos definiciones
+            # sueltas, las redactamos como una lectura de vínculo — qué
+            # trae cada una a la relación, no qué es cada punto en abstracto.
+            etiqueta_a = (nombre_a or "la Persona A").capitalize()
+            etiqueta_b = (nombre_b or "la Persona B").capitalize()
+            ga, gb = generales[0], generales[1]
+            texto = (
+                f"Lectura de vínculo (sin marcador de Hugo ni IA disponible para esta "
+                f"combinación): {etiqueta_a} aporta {ga['punto']} — {ga['lectura_general']} "
+                f"{etiqueta_b} aporta {gb['punto']} — {gb['lectura_general']} El aspecto entre "
+                f"ambos puntos indica cómo esas dos energías se cruzan en el vínculo, no un "
+                f"rasgo de personalidad de una sola persona."
+            )
     else:
         texto = "No hay lectura documentada para esta combinación de puntos."
     return {"texto": texto, "fuente": "lectura_general", "detalle_fuente": "categoría del punto"}

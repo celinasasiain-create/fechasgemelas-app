@@ -1310,10 +1310,19 @@ async function verLectura(btn, idx){
   }
 
   // cuerpo_A/cuerpo_B vienen como "Nombre.punto" (ej. "Persona A.sol");
-  // nos quedamos con lo que sigue al último punto.
-  const puntoA = (c.cuerpo_A||'').split('.').pop().toLowerCase();
-  const puntoB = (c.cuerpo_B||'').split('.').pop().toLowerCase();
-  const clave = `${puntoA}|${puntoB}|${c.aspecto}|${c.orbe.toFixed(4)}`;
+  // separamos el nombre (todo lo anterior al último punto) del punto en sí.
+  const crudoA = c.cuerpo_A || '';
+  const crudoB = c.cuerpo_B || '';
+  const puntoA = crudoA.split('.').pop().toLowerCase();
+  const puntoB = crudoB.split('.').pop().toLowerCase();
+  const nombreA = (crudoA.slice(0, crudoA.lastIndexOf('.')) || 'Persona A').trim();
+  const nombreB = (crudoB.slice(0, crudoB.lastIndexOf('.')) || 'Persona B').trim();
+  // Mismo individuo = mismo nombre de etiqueta en ambos lados (p. ej. cuando
+  // compara a alguien contra sus propias Fechas Gemelas). Si son etiquetas
+  // distintas, es una sinastría entre dos personas y los marcadores fijos de
+  // Hugo (documentados siempre para una sola carta) no corresponden.
+  const mismoIndividuo = nombreA.toLowerCase() === nombreB.toLowerCase();
+  const clave = `${puntoA}|${puntoB}|${c.aspecto}|${c.orbe.toFixed(4)}|${mismoIndividuo}|${nombreA}|${nombreB}`;
 
   cajaLectura.style.display = 'block';
   cajaLectura.innerHTML = 'Buscando lectura…';
@@ -1323,10 +1332,17 @@ async function verLectura(btn, idx){
     if(!data){
       const resp = await fetch(API_BASE + '/api/interpretar', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({punto_a:puntoA, punto_b:puntoB, aspecto:c.aspecto, orbe:c.orbe}),
+        body: JSON.stringify({
+          punto_a:puntoA, punto_b:puntoB, aspecto:c.aspecto, orbe:c.orbe,
+          mismo_individuo: mismoIndividuo, nombre_a: nombreA, nombre_b: nombreB,
+        }),
       });
       data = await resp.json();
-      cacheLecturas[clave] = data;
+      // No guardamos en caché una lectura_general: puede ser que la IA
+      // fallara puntualmente (red, límite momentáneo). Así, si aprieta
+      // "Leer" de nuevo, se reintenta el llamado a la IA en vez de quedar
+      // pegado para siempre con el texto genérico de categoría.
+      if(data.fuente !== 'lectura_general') cacheLecturas[clave] = data;
     }
 
     const ETIQUETA_FUENTE = {
@@ -1335,7 +1351,11 @@ async function verLectura(btn, idx){
       lectura_general: '○ Lectura general de categoría (sin marcador ni IA)',
     };
     const claseFuente = {marcador_hugo:'marcador', ia_estilo_bonito:'general', lectura_general:'general'}[data.fuente] || 'general';
+    const encabezadoQuien = mismoIndividuo
+      ? `<div style="font-size:.78em;color:var(--teal);margin-bottom:4px;">Carta de ${nombreA} — ${nombrePunto(puntoA)} con ${nombrePunto(puntoB)} (misma persona)</div>`
+      : `<div style="font-size:.78em;color:var(--teal);margin-bottom:4px;">${nombrePunto(puntoA)} de <strong>${nombreA}</strong> con ${nombrePunto(puntoB)} de <strong>${nombreB}</strong> (sinastría entre dos personas)</div>`;
     cajaLectura.innerHTML = `
+      ${encabezadoQuien}
       <div class="${claseFuente}"><strong>${data.texto}</strong></div>
       <div style="font-size:.78em;color:var(--teal);">
         ${ETIQUETA_FUENTE[data.fuente] || data.fuente}
@@ -1375,8 +1395,20 @@ function botonLeer(payload, endpoint){
   return `<button class="secundario" onclick="verLecturaGenerica('${id}')" title="Ver interpretación">Leer</button><div class="lectura" id="${id}"></div>`;
 }
 
-function botonLeerAspecto(puntoA, puntoB, aspecto, orbe, tecnica){
-  return botonLeer({punto_a: puntoA, punto_b: puntoB, aspecto, orbe, tecnica}, '/api/interpretar');
+function botonLeerAspecto(puntoA, puntoB, aspecto, orbe, tecnica, mismoIndividuo, nombreA, nombreB){
+  // mismoIndividuo: true (default) = los dos puntos son de la carta de UNA
+  // sola persona (Progresiones, Retornos, Antivértex, Estrellas Fijas,
+  // Horaria) -> ahí sí corresponden los marcadores fijos de Hugo. false =
+  // los puntos vienen de DOS personas distintas (Sinastría, Contacto,
+  // Discriminación por orbe, Mellizos) -> esos marcadores (documentados
+  // siempre para una sola carta) no aplican, y la app arma una lectura de
+  // vínculo en su lugar. Si no se especifica, se asume true (compatibilidad
+  // con los llamados existentes).
+  const payload = {punto_a: puntoA, punto_b: puntoB, aspecto, orbe, tecnica,
+    mismo_individuo: mismoIndividuo === undefined ? true : mismoIndividuo};
+  if(nombreA) payload.nombre_a = nombreA;
+  if(nombreB) payload.nombre_b = nombreB;
+  return botonLeer(payload, '/api/interpretar');
 }
 
 function botonLeerEvento(tecnica, descripcion, contextoExtra){
@@ -1405,7 +1437,11 @@ async function verLecturaGenerica(id){
         method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload),
       });
       data = await resp.json();
-      cacheLecturas[clave] = data;
+      // No guardamos en caché una respuesta sin IA real (lectura_general, o
+      // disponible:false): puede ser un fallo puntual de la IA, no un
+      // "no hay nada que decir" definitivo — así, volver a apretar "Leer"
+      // reintenta en vez de quedar pegado con el texto más pobre.
+      if(data.fuente !== 'lectura_general' && data.disponible !== false) cacheLecturas[clave] = data;
     }
     if(data.error){
       caja.innerHTML = `<span style="color:var(--danger);">${data.error}</span>`;
@@ -1797,7 +1833,7 @@ async function calcularMellizos(){
         <td style="font-size:.85em;">${retornoStr}</td>
         <td style="font-size:.85em;">${r.referencia.etiqueta}</td>
         <td style="font-size:.85em;">${ptStr}</td>
-        <td>${botonLeerAspecto('luna', 'sol', 'Conjunción', orbeGrados, 'Etapa Mellizos')}</td>
+        <td>${botonLeerAspecto('luna', 'sol', 'Conjunción', orbeGrados, 'Etapa Mellizos', false, 'el/la mellizo/a', r.referencia.etiqueta)}</td>
       </tr>`;
     }
     html += '</tbody></table>';
@@ -1840,7 +1876,7 @@ async function calcularSinastria(){
     let html = `<p style="color:var(--teal);font-size:.85em;">${data.total_coincidencias} coincidencias, ${data.total_partiles} partiles.</p>`;
     html += data.coincidencias.length === 0
       ? '<p>No se encontraron aspectos dentro del orbe (1° Sol/Luna, 2° puntos angulares).</p>'
-      : tablaCoincidencias(data.coincidencias, 'Sinastría');
+      : tablaCoincidencias(data.coincidencias, 'Sinastría', false);
     box.innerHTML = html;
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
@@ -1866,16 +1902,25 @@ function primeraPalabraClave(s){
   return String(s||'').trim().split(/\s+/)[0].toLowerCase();
 }
 
-function tablaCoincidencias(coincidencias, tecnica){
+function tablaCoincidencias(coincidencias, tecnica, mismoIndividuo){
+  // mismoIndividuo=true (default): técnicas de una sola persona
+  // (Progresiones, Arco Solar, Retornos de Marte/Júpiter/Saturno) donde
+  // "Punto A"/"Punto B" son dos puntos de la MISMA carta. mismoIndividuo=
+  // false: Sinastría/Sinastría-Retornos, donde son dos personas distintas
+  // (ahí no corresponden los marcadores fijos de Hugo, documentados para
+  // una sola carta — ver interpretacion.py).
+  const esCruzada = mismoIndividuo === false;
   let html = '<table><thead><tr><th>Punto A</th><th>Punto B</th><th>Aspecto</th><th>Orbe</th><th>Partil</th><th>Leer</th></tr></thead><tbody>';
   for(const c of coincidencias){
+    const nombreA = esCruzada ? (String(c.cuerpo_A||'').split('.')[0].trim() || 'Persona A') : null;
+    const nombreB = esCruzada ? (String(c.cuerpo_B||'').split('.')[0].trim() || 'Persona B') : null;
     html += `<tr>
       <td>${c.cuerpo_A} <span style="color:var(--teal);font-size:.85em;">(${c.signo_A} ${c.grado_A.toFixed(2)}°)</span></td>
       <td>${c.cuerpo_B} <span style="color:var(--teal);font-size:.85em;">(${c.signo_B} ${c.grado_B.toFixed(2)}°)</span></td>
       <td>${c.aspecto}</td>
       <td>${c.orbe}°</td>
       <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
-      <td>${botonLeerAspecto(claveCuerpo(c.cuerpo_A), claveCuerpo(c.cuerpo_B), c.aspecto, c.orbe, tecnica || 'Sinastría')}</td>
+      <td>${botonLeerAspecto(claveCuerpo(c.cuerpo_A), claveCuerpo(c.cuerpo_B), c.aspecto, c.orbe, tecnica || 'Sinastría', !esCruzada, nombreA, nombreB)}</td>
     </tr>`;
   }
   html += '</tbody></table>';
@@ -1925,7 +1970,7 @@ async function calcularSinastriaRetornos(){
     const data = await resp.json();
     if(data.error){ box.innerHTML = `<p style="color:var(--danger);">${data.error}</p>`; return; }
     let html = `<p style="color:var(--teal);font-size:.85em;">${data.total_coincidencias} coincidencias, ${data.total_partiles} partiles.</p>`;
-    html += data.coincidencias.length ? tablaCoincidencias(data.coincidencias, 'Sinastría Atemporal (retornos vs. natal)') : '<p>No se encontraron aspectos dentro del orbe.</p>';
+    html += data.coincidencias.length ? tablaCoincidencias(data.coincidencias, 'Sinastría Atemporal (retornos vs. natal)', false) : '<p>No se encontraron aspectos dentro del orbe.</p>';
     box.innerHTML = html;
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
@@ -2307,7 +2352,7 @@ async function calcularContacto(){
           <td>${c.aspecto}</td>
           <td>${c.orbe}°</td>
           <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
-          <td>${botonLeerAspecto(primeraPalabraClave(c.punto_A), 'sol', c.aspecto, c.orbe, 'Técnica de Contacto')}</td>
+          <td>${botonLeerAspecto(primeraPalabraClave(c.punto_A), 'sol', c.aspecto, c.orbe, 'Técnica de Contacto', false, 'Persona A', 'Persona B')}</td>
         </tr>`;
       }
       html += '</tbody></table>';
@@ -2404,7 +2449,7 @@ async function calcularCotidianCardinal(){
           <td>${c.aspecto}</td>
           <td>${c.orbe}°</td>
           <td>${c.partil ? '<strong style="color:var(--partil);">Sí</strong>' : '—'}</td>
-          <td>${botonLeerAspecto(primeraPalabraClave(c.punto_A), 'sol', c.aspecto, c.orbe, 'Cotidian Cardinal 1')}</td>
+          <td>${botonLeerAspecto(primeraPalabraClave(c.punto_A), 'sol', c.aspecto, c.orbe, 'Cotidian Cardinal 1', false, 'Persona A', 'Persona B')}</td>
         </tr>`;
       }
       html += '</tbody></table>';
