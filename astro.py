@@ -49,9 +49,9 @@ def sign_of(lon):
     return SIGNS[idx], lon - idx * 30
 
 
-def jd_from_local(year, month, day, hour, minute, utc_offset):
+def jd_from_local(year, month, day, hour, minute, utc_offset, second=0):
     """Convierte fecha/hora LOCAL a Día Juliano UT."""
-    local_dt = dt.datetime(year, month, day, hour, minute)
+    local_dt = dt.datetime(year, month, day, hour, minute, int(second or 0))
     ut_dt = local_dt - dt.timedelta(hours=utc_offset)
     return swe.julday(ut_dt.year, ut_dt.month, ut_dt.day,
                        ut_dt.hour + ut_dt.minute / 60.0 + ut_dt.second / 3600.0)
@@ -252,7 +252,7 @@ def buscar_retornos(jd_origen, lon_objetivo, jd_inicio, jd_fin, helio, sideral,
 
 def calcular_fechas_gemelas(year, month, day, hour, minute, utc_offset,
                              anios_adelante=250, anios_atras=250,
-                             lat=None, lon=None, cuerpo_base="PLUTON"):
+                             lat=None, lon=None, cuerpo_base="PLUTON", second=0):
     """Calcula los retornos del cuerpo base (Plutón por defecto; Neptuno
     para la técnica de Mellizos de Bonito) en las 4 variantes (Geo/Helio x
     Trópico/Sideral) hacia adelante y atrás de la fecha de origen, y arma
@@ -264,7 +264,7 @@ def calcular_fechas_gemelas(year, month, day, hour, minute, utc_offset,
     Fortuna — los "equivalentes" de cada Fecha Gemela para esos puntos
     personales, calculados como si fuera una carta completa levantada en
     ese instante y lugar."""
-    jd_origen = jd_from_local(year, month, day, hour, minute, utc_offset)
+    jd_origen = jd_from_local(year, month, day, hour, minute, utc_offset, second)
     jd_ini = jd_origen - anios_atras * 365.2425
     jd_fin = jd_origen + anios_adelante * 365.2425
 
@@ -755,7 +755,7 @@ def rectificar_por_luna(year, month, day, hour_aprox, minute_aprox, utc_offset,
     Devuelve, para cada aspecto mayor posible, el horario exacto donde ocurre
     dentro de la ventana pedida (la Luna se mueve rápido: ~0.5°/hora, así que
     esto sí permite afinar minutos/segundos, a diferencia de comparar Soles)."""
-    jd_centro = jd_from_local(year, month, day, hour_aprox, minute_aprox, utc_offset) + (second or 0) / 86400.0
+    jd_centro = jd_from_local(year, month, day, hour_aprox, minute_aprox, utc_offset, second)
     jd_ini = jd_centro - ventana_horas / 24.0
     jd_fin = jd_centro + ventana_horas / 24.0
 
@@ -990,3 +990,77 @@ def cartas_analogas(persona, pasos_adelante=12, pasos_atras=12, utc_offset_salid
         "total_cartas": len(adelante) + len(atras),
         "con_angulos": lat is not None and lon is not None,
     }
+
+
+def rectificar_por_fila(year, month, day, hour, minute, second, utc_offset,
+                        variante, jd_retorno_aprox, lon_referencia, aspecto,
+                        ventana_seg=7200, cuerpo_base="PLUTON"):
+    """Rectificación exacta a partir de una fila de Fechas Gemelas con Luna.
+    A diferencia de la versión simple (que supone que el retorno se corre
+    1:1 con la hora de nacimiento), acá se RECALCULA el retorno del cuerpo
+    base para cada hora de nacimiento candidata: al correr el nacimiento
+    δ segundos, la longitud natal de Plutón cambia y el retorno se corre
+    δ·(v_nac / v_ret) — que NO es δ cuando Plutón va a otra velocidad (o
+    retrógrado) en el momento del retorno. Se busca el δ para el cual la
+    Luna (Trópico geocéntrico) en ese retorno hace el aspecto exacto con la
+    posición de referencia."""
+    helio = "helio" in variante
+    sideral = "sideral" in variante
+    jd_nac0 = jd_from_local(year, month, day, hour, minute, utc_offset, second)
+    angulo = ASPECTOS[aspecto]
+
+    def retorno(delta_seg, t_ini):
+        objetivo, _ = cuerpo_base_lon(jd_nac0 + delta_seg / 86400.0, cuerpo_base, helio, sideral)
+        t = t_ini
+        for _ in range(60):
+            lo, spd = cuerpo_base_lon(t, cuerpo_base, helio, sideral)
+            h = _diff_angular(lo, objetivo)
+            if abs(h) < 1e-9:
+                break
+            if abs(spd) < 1e-7:
+                return None, spd
+            t -= h / spd
+        return t, spd
+
+    def luna(t):
+        return sol_luna_geo_tropical(t)[1]
+
+    objs = {norm360(lon_referencia + angulo), norm360(lon_referencia - angulo)}
+    pasos = list(range(-int(ventana_seg), int(ventana_seg) + 1, 120))
+    resultados = []
+    for obj in objs:
+        def g(d):
+            t, _ = retorno(d, jd_retorno_aprox)
+            if t is None or abs(t - jd_retorno_aprox) > 2.0:
+                return None, None
+            return _diff_angular(luna(t), obj), t
+        prev_d, (prev_g, _t) = pasos[0], g(pasos[0])
+        for d in pasos[1:]:
+            cur_g, _t = g(d)
+            if prev_g is not None and cur_g is not None and (prev_g > 0) != (cur_g > 0):
+                lo, hi, glo = prev_d, d, prev_g
+                for _ in range(50):
+                    mid = (lo + hi) / 2.0
+                    gm, _ = g(mid)
+                    if gm is None:
+                        break
+                    if (gm > 0) == (glo > 0):
+                        lo, glo = mid, gm
+                    else:
+                        hi = mid
+                dstar = (lo + hi) / 2.0
+                gs, ts = g(dstar)
+                if gs is not None and abs(gs) < 1e-4:
+                    _, spd_ret = retorno(dstar, jd_retorno_aprox)
+                    _, spd_nac = cuerpo_base_lon(jd_nac0, cuerpo_base, helio, sideral)
+                    resultados.append({
+                        "delta_segundos": round(dstar, 2),
+                        "retorno_nuevo": jd_to_local(ts, utc_offset),
+                        "desplazamiento_retorno_segundos": round((ts - jd_retorno_aprox) * 86400.0, 2),
+                        "vel_nacimiento_gr_dia": round(spd_nac, 6),
+                        "vel_retorno_gr_dia": round(spd_ret, 6),
+                        "diferencia_arco_segundos": round(abs(gs) * 3600, 3),
+                    })
+            prev_d, prev_g = d, cur_g
+    resultados.sort(key=lambda r: abs(r["delta_segundos"]))
+    return resultados

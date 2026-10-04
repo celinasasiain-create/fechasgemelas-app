@@ -110,7 +110,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
       <label>Nombre / etiqueta</label><input type="text" id="nombreA" value="Persona A">
       <div class="row">
         <div><label>Fecha</label><input type="date" id="fechaA"></div>
-        <div><label>Hora</label><input type="time" id="horaA" step="60"></div>
+        <div><label>Hora (h:min:s)</label><input type="time" id="horaA" step="1"></div>
       </div>
       <div class="row">
         <div><label>Desfase UTC (horas y minutos)</label><input type="number" id="utcA" value="-3" step="0.5"></div>
@@ -124,7 +124,7 @@ tr.partil td:first-child::before{content:'✦';color:var(--partil);margin-right:
       <label>Nombre / etiqueta</label><input type="text" id="nombreB" value="Persona B">
       <div class="row">
         <div><label>Fecha</label><input type="date" id="fechaB"></div>
-        <div><label>Hora</label><input type="time" id="horaB" step="60"></div>
+        <div><label>Hora (h:min:s)</label><input type="time" id="horaB" step="1"></div>
       </div>
       <div class="row">
         <div><label>Desfase UTC (horas y minutos)</label><input type="number" id="utcB" value="-3" step="0.5"></div>
@@ -1342,9 +1342,9 @@ function nombrePunto(p){
 
 async function comparar(){
   const [ay,am,ad] = document.getElementById('fechaA').value.split('-').map(Number);
-  const [ah,amin] = document.getElementById('horaA').value.split(':').map(Number);
+  const [ah,amin,asec] = document.getElementById('horaA').value.split(':').map(Number);
   const [by,bm,bd] = document.getElementById('fechaB').value.split('-').map(Number);
-  const [bh,bmin] = document.getElementById('horaB').value.split(':').map(Number);
+  const [bh,bmin,bsec] = document.getElementById('horaB').value.split(':').map(Number);
 
   if(!ay || !by){
     alert('Cargá las dos fechas.');
@@ -1365,7 +1365,7 @@ async function comparar(){
   const payload = {
     comparar_angulos: compararAngulos,
     fecha_A: {
-      year:ay, month:am, day:ad, hour:ah||0, minute:amin||0,
+      year:ay, month:am, day:ad, hour:ah||0, minute:amin||0, second:asec||0,
       utc_offset: parseFloat(document.getElementById('utcA').value),
       anios_adelante: parseInt(document.getElementById('aniosAdelante').value),
       anios_atras: parseInt(document.getElementById('aniosAtras').value),
@@ -1373,7 +1373,7 @@ async function comparar(){
       lon: isNaN(lonA) ? undefined : lonA,
     },
     fecha_B: {
-      year:by, month:bm, day:bd, hour:bh||0, minute:bmin||0,
+      year:by, month:bm, day:bd, hour:bh||0, minute:bmin||0, second:bsec||0,
       utc_offset: parseFloat(document.getElementById('utcB').value),
       anios_adelante: parseInt(document.getElementById('aniosAdelante').value),
       anios_atras: parseInt(document.getElementById('aniosAtras').value),
@@ -1635,7 +1635,49 @@ function rectificarDesdeFila(i, lado){
               fila: fila};
   const btn = document.querySelector('.tab-btn[onclick*="\'rectificar\'"]');
   mostrarTab('rectificar', btn);
-  rectificarHora();
+  rectificarFilaExacta();
+}
+
+
+async function rectificarFilaExacta(){
+  const c = _rectCtx; const box = document.getElementById('rectResultado');
+  const [ny,nm,nd] = c.fechaNat.split('-').map(Number);
+  const [nh,nmi,nsc] = c.horaNat.split(':').map(Number);
+  const [ry,rm,rd] = c.iso.slice(0,10).split('-').map(Number);
+  const [rh,rmi,rs] = c.iso.slice(11,19).split(':').map(Number);
+  const payload = {
+    year:ny, month:nm, day:nd, hour:nh||0, minute:nmi||0, second:nsc||0,
+    utc_offset: parseFloat(document.getElementById('utc'+c.lado).value),
+    variante: c.fila['variante_'+c.lado],
+    retorno: {year:ry, month:rm, day:rd, hour:rh, minute:rmi, second:rs},
+    lon_referencia: parseFloat(document.getElementById('rectRef').value),
+    aspecto: c.fila.aspecto,
+    ventana_seg: Math.round(parseFloat(document.getElementById('rectVentana').value) * 3600),
+  };
+  box.innerHTML = '<p style="color:var(--gold);">Recalculando el retorno para cada hora de nacimiento candidata…</p>';
+  try{
+    const resp = await fetch('/api/rectificar_fila', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const data = await resp.json();
+    if(data.error){ box.innerHTML = `<p style="color:var(--danger);">${data.error}</p>`; return; }
+    if(!data.resultados.length){
+      box.innerHTML = `<p style="color:var(--teal);">Con esta fila no hay una hora de nacimiento, dentro de ± ${hms(payload.ventana_seg)}, que haga exacto el aspecto (puede ocurrir si Plutón está casi detenido en ese retorno). Pruebe con otra fila o amplíe la ventana.</p>`;
+      return;
+    }
+    const nat = _msLocal(ny,nm,nd,nh||0,nmi||0,nsc||0);
+    const p2 = n => String(n).padStart(2,'0');
+    box.innerHTML = data.resultados.map(r=>{
+      const rect = nat + r.delta_segundos*1000; const rt = new Date(rect);
+      const fechaRect = `${rt.getUTCFullYear()}-${p2(rt.getUTCMonth()+1)}-${p2(rt.getUTCDate())}`;
+      const nr = r.retorno_nuevo;
+      return `<div class="stat" style="text-align:left;margin-bottom:8px;">
+        <div style="padding:8px;border:1px solid var(--gold);border-radius:6px;">
+          <strong style="color:var(--gold);">Hora de nacimiento rectificada de ${c.nombre}:</strong>
+          ${_fmtLocal(nat)} → <strong>${_fmtLocal(rect)}</strong>${fechaRect !== c.fechaNat ? ' ('+fechaRect+')' : ''}
+          <span style="color:var(--teal);">— corrección ${hmsSigno(r.delta_segundos)} (h:min:s)</span></div>
+        <p style="color:var(--teal);font-size:.85em;margin:6px 0 0;">Con esa hora de nacimiento, el retorno de la fila pasa a ${nr.year}-${p2(nr.month)}-${p2(nr.day)} ${p2(nr.hour)}:${p2(nr.minute)}:${p2(nr.second)} (corrido ${hmsSigno(r.desplazamiento_retorno_segundos)}), y ahí la Luna hace el ${c.fila.aspecto} exacto (residual ${dms(r.diferencia_arco_segundos/3600,2)}).
+        Plutón iba a ${r.vel_nacimiento_gr_dia.toFixed(4)}°/día al nacer y a ${r.vel_retorno_gr_dia.toFixed(4)}°/día en el retorno: por eso el retorno se corre ${(r.desplazamiento_retorno_segundos/r.delta_segundos).toFixed(2)} veces lo que se corre el nacimiento${Math.abs(r.desplazamiento_retorno_segundos/r.delta_segundos-1)>0.05 ? ' (no 1:1; una resta simple de minutos daría un resultado equivocado)' : ' (aquí casi 1:1)'}.</p></div>`;
+    }).join('') + `<p style="color:var(--teal);font-size:.85em;">Es una <strong>hipótesis</strong>: casi cualquier fila con Luna ofrece alguna corrección de pocos minutos. Es creíble solo si varias filas independientes y algún evento de vida la sostienen. Cargue la hora en la Persona ${c.lado} y compare de nuevo para verificar.</p>`;
+  }catch(e){ box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`; }
 }
 
 function _msLocal(y,m,d,h,mi,s){ return Date.UTC(y, m-1, d, h, mi, s); }
@@ -1680,8 +1722,8 @@ async function rectificarHora(){
         const base = _msLocal(y,m,d,h||0,min||0,sec||0);
         const delta = (ms - base) / 1000;      // segundos que hay que correr
         const [ny,nm,nd] = _rectCtx.fechaNat.split('-').map(Number);
-        const [nh,nmi] = _rectCtx.horaNat.split(':').map(Number);
-        const nat = _msLocal(ny,nm,nd,nh||0,nmi||0,0);
+        const [nh,nmi,nsc] = _rectCtx.horaNat.split(':').map(Number);
+        const nat = _msLocal(ny,nm,nd,nh||0,nmi||0,nsc||0);
         const rect = nat + delta*1000;
         const rt = new Date(rect);
         const fechaRect = `${rt.getUTCFullYear()}-${p2(rt.getUTCMonth()+1)}-${p2(rt.getUTCDate())}`;
@@ -1696,7 +1738,7 @@ async function rectificarHora(){
         <br><span style="color:var(--teal);font-size:.85em;">Luna en ${SIGNOS_ZOD[Math.floor(r.luna_lon/30)]} ${dms(r.luna_lon % 30, 1)} · diferencia residual: ${dms(r.diferencia_arco_segundos/3600, 2)}</span>
         ${extra}
       </div>`;
-    }).join('') + (_rectCtx ? `<p style="color:var(--teal);font-size:.85em;">Esta es una <strong>hipótesis</strong>: la Luna se mueve unos 13° por día, así que casi cualquier fila con Luna ofrece alguna corrección de pocos minutos. Una hora es creíble solo si varias filas independientes y algún evento de vida (Proluna, Revolución…) la sostienen. Para comprobarla, cargue la hora rectificada en la Persona ${_rectCtx.lado} y vuelva a comparar: la coincidencia de la fila debería quedar más ajustada. El cálculo supone que la fecha del retorno se corre en la misma cantidad que la hora de nacimiento (aproximación muy buena, no exacta).</p>` : '');
+    }).join('') + (_rectCtx ? `<p style="color:var(--teal);font-size:.85em;">Esta es una <strong>hipótesis</strong>: la Luna se mueve unos 13° por día, así que casi cualquier fila con Luna ofrece alguna corrección de pocos minutos. Una hora es creíble solo si varias filas independientes y algún evento de vida (Proluna, Revolución…) la sostienen. Para comprobarla, cargue la hora rectificada (con sus segundos) en la Persona ${_rectCtx.lado} y vuelva a comparar: la coincidencia de la fila debería quedar más ajustada. El cálculo supone que la fecha del retorno se corre en la misma cantidad que la hora de nacimiento (aproximación muy buena, no exacta).</p>` : '');
   }catch(e){
     box.innerHTML = `<p style="color:var(--danger);">Error de conexión: ${e.message}</p>`;
   }

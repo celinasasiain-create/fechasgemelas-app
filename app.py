@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from astro import (
-    calcular_fechas_gemelas, comparar_cartas_muertas, rectificar_por_luna,
+    calcular_fechas_gemelas, comparar_cartas_muertas, rectificar_por_luna, rectificar_por_fila,
     CUERPOS_COMPARABLES, carta_natal_simple, comparar_sinastria, comparar_natal_vs_retornos,
     progresiones_secundarias, comparar_progresiones_vs_natal,
     arco_solar_dirigido, diagrama_flujo_arco_solar,
@@ -96,13 +96,13 @@ def comparar():
         else:
             fa, fb = data["fecha_A"], data["fecha_B"]
             cartaA = calcular_fechas_gemelas(
-                fa["year"], fa["month"], fa["day"], fa["hour"], fa["minute"], fa["utc_offset"],
+                fa["year"], fa["month"], fa["day"], fa["hour"], fa["minute"], fa["utc_offset"], second=fa.get("second", 0),
                 anios_adelante=fa.get("anios_adelante", 250), anios_atras=fa.get("anios_atras", 250),
                 lat=fa.get("lat") if comparar_angulos else None,
                 lon=fa.get("lon") if comparar_angulos else None,
             )
             cartaB = calcular_fechas_gemelas(
-                fb["year"], fb["month"], fb["day"], fb["hour"], fb["minute"], fb["utc_offset"],
+                fb["year"], fb["month"], fb["day"], fb["hour"], fb["minute"], fb["utc_offset"], second=fb.get("second", 0),
                 anios_adelante=fb.get("anios_adelante", 250), anios_atras=fb.get("anios_atras", 250),
                 lat=fb.get("lat") if comparar_angulos else None,
                 lon=fb.get("lon") if comparar_angulos else None,
@@ -144,6 +144,23 @@ def rectificar():
     except Exception as e:
         return jsonify({"error": f"No se pudo rectificar: {e}"}), 500
     return jsonify({"resultados": resultado})
+
+
+@app.route("/api/rectificar_fila", methods=["POST"])
+def rectificar_fila():
+    """Rectificación exacta desde una fila de Fechas Gemelas (recalcula el retorno)."""
+    d = request.get_json(force=True)
+    try:
+        from astro import jd_from_local as _jd
+        r = d["retorno"]
+        jd_ret = _jd(r["year"], r["month"], r["day"], r["hour"], r["minute"], d["utc_offset"], r.get("second", 0))
+        res = rectificar_por_fila(
+            d["year"], d["month"], d["day"], d["hour"], d["minute"], d.get("second", 0),
+            d["utc_offset"], d["variante"], jd_ret, d["lon_referencia"], d["aspecto"],
+            ventana_seg=d.get("ventana_seg", 7200))
+    except Exception as e:
+        return jsonify({"error": f"No se pudo rectificar: {e}"}), 500
+    return jsonify({"resultados": res})
 
 
 @app.route("/api/carta_puntos", methods=["POST"])
