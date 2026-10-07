@@ -29,6 +29,7 @@ literal es el texto que está leyendo.
 """
 import os
 import re
+import sys
 
 from diccionario import (
     CATEGORIA_PUNTO,
@@ -37,7 +38,23 @@ from diccionario import (
     interpretar as _interpretar_fijo,
 )
 
-ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5-5")
+
+# Tope de longitud de cada lectura (2-4 frases). Los modelos nuevos cuentan más
+# tokens para el mismo texto, así que se deja margen para que no salga cortada.
+MAX_TOKENS_LECTURA = 500
+
+# Los modelos nuevos de Claude "piensan" antes de responder si no se les indica
+# lo contrario, y ese pensamiento se descuenta del tope de arriba: con un tope
+# chico la lectura puede llegar vacía o cortada. Acá se pide la respuesta
+# directa. Cada modelo acepta una forma distinta de pedirlo, así que se prueban
+# en este orden y se recuerda la primera que el modelo acepta.
+_OPCIONES_PENSAMIENTO = (
+    {"thinking": {"type": "between_tools"}},  # Claude Sonnet 5.5
+    {"thinking": {"type": "disabled"}},       # Claude Sonnet 5 y anteriores
+    {},                                        # modelos que no aceptan el parámetro
+)
+_opcion_pensamiento_ok = None
 
 # Principios de estilo y contenido de Hugo Bonito, reconstruidos a partir de
 # todas las clases y técnicas revisadas en este proyecto (Fechas Gemelas,
@@ -110,18 +127,40 @@ def _llamar_ia(descripcion_evento, contexto_extra=""):
     prompt = descripcion_evento
     if contexto_extra:
         prompt += f"\n\nContexto adicional de la técnica: {contexto_extra}"
+    global _opcion_pensamiento_ok
     try:
-        respuesta = cliente.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=300,
-            system=PRINCIPIOS_BONITO,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        import anthropic
+        if _opcion_pensamiento_ok is not None:
+            a_probar = [_opcion_pensamiento_ok]
+        else:
+            a_probar = list(range(len(_OPCIONES_PENSAMIENTO)))
+        respuesta = None
+        for i in a_probar:
+            try:
+                respuesta = cliente.messages.create(
+                    model=ANTHROPIC_MODEL,
+                    max_tokens=MAX_TOKENS_LECTURA,
+                    system=PRINCIPIOS_BONITO,
+                    messages=[{"role": "user", "content": prompt}],
+                    **_OPCIONES_PENSAMIENTO[i],
+                )
+                _opcion_pensamiento_ok = i
+                break
+            except anthropic.BadRequestError:
+                # El modelo no acepta esta forma de pedir respuesta directa:
+                # se prueba la siguiente. Si era la última, el error sigue.
+                if i == a_probar[-1]:
+                    raise
         texto = "".join(
             bloque.text for bloque in respuesta.content if getattr(bloque, "type", None) == "text"
         ).strip()
+        if not texto:
+            print(f"[IA] El modelo {ANTHROPIC_MODEL} no devolvió texto "
+                  f"(motivo: {getattr(respuesta, 'stop_reason', None)}).", file=sys.stderr, flush=True)
         return texto or None
-    except Exception:
+    except Exception as e:
+        # Queda registrado en los logs de Render para poder ver por qué falló.
+        print(f"[IA] No se pudo generar la lectura con {ANTHROPIC_MODEL}: {e}", file=sys.stderr, flush=True)
         return None
 
 
